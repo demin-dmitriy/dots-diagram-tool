@@ -305,11 +305,15 @@ var PLAYDOTS_THEME = (function() {
     var blueColor = '#2358ED';
     var redColor = '#D32020';
 
+    // TODO: rework this
     var styles =
     {
         0: [D.fillStyle(blueColor), D.strokeStyle(blueColor)],
         1: [D.fillStyle(redColor), D.strokeStyle(redColor)]
     };
+
+
+
 
     var theme = (ctx) =>
     ({
@@ -329,7 +333,19 @@ var PLAYDOTS_THEME = (function() {
             ctx.canvas.height = height;
         },
 
-        // capturePolygon: (player, points)
+        capturePolygon: function(player, points)
+        {
+            console.log("drawing polygon", player, points);
+            assert(points.length > 0);
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (var i = 1; i < points.length; i++)
+            {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        },
 
         // setScore
     });
@@ -449,9 +465,17 @@ var Visualizer = (function() {
         theme.dot(player, this._boardPointToCanvasPoint(new Point(x, y)));
     };
 
-    Visualizer.prototype.capture = function(...args)
+    Visualizer.prototype.capture = function(player, pointChain)
     {
-        console.log("Visualizer: capture!", args);
+        console.log("Visualizer: capture!", player, pointChain);
+
+        var canvasPointChain = new Array(pointChain.length);
+        for (var i = 0; i < canvasPointChain.length; i++)
+        {
+            canvasPointChain[i] = this._boardPointToCanvasPoint(pointChain[i]);
+        }
+
+        this._theme.capturePolygon(player, canvasPointChain);
         // TODO: отрисовка захвата
         // Какие аргументы должны быть? Внешняя цепочка, и список дырок?
     };
@@ -874,7 +898,7 @@ var Game = (function() {
     function fromInternalCoordArray(arrayInternalCoord)
     {
         assert(arrayInternalCoord instanceof Array);
-        var coordinateArray = Array(arrayInternalCoord);
+        var coordinateArray = Array(arrayInternalCoord.length);
         for (var i = 0; i < coordinateArray.length; i++)
         {
             coordinateArray[i] = arrayInternalCoord[i].toCoordinate();
