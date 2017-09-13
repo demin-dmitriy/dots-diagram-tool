@@ -432,16 +432,17 @@ var Visualizer = (function() {
         }
     };
 
-    Visualizer.prototype.playAt = function(player, x, y)
+    Visualizer.prototype.playAt = function(player, coordinate)
     {
-        this._state.act((self) => self._playAt(player, x, y), this);
+        this._state.act((self) => self._playAt(player, coordinate), this);
     };
 
-    Visualizer.prototype._playAt = function(player, x, y)
+    Visualizer.prototype._playAt = function(player, coordinate)
     {
         var engine = this._engine;
         var theme = this._theme;
-
+        var x = coordinate.x;
+        var y = coordinate.y;
         assert(0 <= x && x < engine.boardWidth());
         assert(0 <= y && y < engine.boardHeight());
 
@@ -462,6 +463,7 @@ var Visualizer = (function() {
 
     Visualizer.prototype.onMouseClick = function(canvasPoint)
     {
+        assert(canvasPoint instanceof Lib.Point);
         var theme = this._theme;
         var engine = this._engine;
         var gridStep = theme.gridStep
@@ -470,9 +472,10 @@ var Visualizer = (function() {
         var boardY = Math.floor((canvasPoint.y - this._fieldTop + gridStep / 2) / gridStep);
         if (0 <= boardX && boardX < engine.boardWidth() && 0 <= boardY && boardY < engine.boardHeight())
         {
-            if (engine.at(boardX, boardY).isUnoccupied())
+            var coordinate = new Game.Coordinate(boardX, boardY);
+            if (engine.at(coordinate).isUnoccupied())
             {
-                engine.playAt(boardX, boardY);
+                engine.playAt(coordinate);
             }
         }
     };
@@ -505,7 +508,9 @@ var Game = (function() {
     "use strict";
 
 
-    var Array2D = Lib.Array2D;
+    var wall = 1;
+    var space = 1;
+
 
     function Nobody() { }                 /* local */
     function Player(id) { this.id = id; } /* local */
@@ -529,11 +534,34 @@ var Game = (function() {
     function Coordinate(x, y)
     {
         assert(Number.isInteger(x) && Number.isInteger(y), "Coordinates must be integer");
+        assert(x >= 0 && y >= 0);
         Lib.Point.call(this, x, y);
     }
 
     Coordinate.prototype = Object.create(Lib.Point.prototype);
     Coordinate.prototype.constructor = Coordinate;
+
+
+    /* local */
+    function InternalCoord(x, y)
+    {
+        assert(Number.isInteger(x) && Number.isInteger(y), "Coordinates must be integer");
+        Lib.Point.call(this, x, y);
+    }
+
+    InternalCoord.prototype = Object.create(Lib.Point.prototype);
+    InternalCoord.prototype.constructor = InternalCoord;
+
+    InternalCoord.fromCoordinate = function(coordinate)
+    {
+        assert(coordinate instanceof Coordinate);
+        return new InternalCoord(wall + space + coordinate.x, wall + space + coordinate.y);
+    };
+
+    InternalCoord.prototype.toCoordinate = function()
+    {
+        return new Coordinate(this.x - (wall + space), this.y - (wall + space));
+    };
 
 
     function Point()
@@ -574,24 +602,64 @@ var Game = (function() {
     };
 
 
-    function Engine(width, height)
+    function Board(width, height)
     {
-        // Add fantom points to facilitate traversal algorithms
-        var wall = 1;
-        var space = 1;
-
-        this._board = new Array2D
+        assert(Number.isInteger(width) && Number.isInteger(height));
+        Lib.Array2D.call
         (
+            this,
             wall + space + width + space + wall,
             wall + space + height + space + wall,
             (i, j) => new Point()
         );
+        this._width = width;
+        this._height = height;
+    }
+
+    Board.prototype = Object.create(Lib.Array2D.prototype);
+    Board.prototype.constructor = Board;    
+
+    Board.prototype._convertCoordinate = function(anyCoordinate)
+    {
+        if (anyCoordinate instanceof Coordinate)
+        {
+            assert(0 <= anyCoordinate.x && anyCoordinate.x < this._width);
+            assert(0 <= anyCoordinate.y && anyCoordinate.y < this._height);
+            return InternalCoord.fromCoordinate(anyCoordinate);
+        }
+        assert(anyCoordinate instanceof InternalCoord,
+               "Invalid argument type: Must be a Coordinate or InternalCoord");
+        return anyCoordinate;
+    };
+
+    Board.prototype.at = function(anyCoordinate)
+    {
+        var internalCoord = this._convertCoordinate(anyCoordinate);
+        return Lib.Array2D.prototype.at.call(this, internalCoord.x, internalCoord.y);
+    };
+
+    Board.prototype.set = function(anyCoordinate, value)
+    {
+        var internalCoord = this._convertCoordinate(anyCoordinate);
+        return Lib.Array2D.prototype.set.call(this, internalCoord.x, internalCoord.y, value);
+    };
+
+    Board.prototype.width = function()
+    {
+        return this._width;
+    };
+
+    Board.prototype.height = function()
+    {
+        return this._height;
+    };
+
+
+    function Engine(width, height)
+    {
+        this._board = new Board(width, height);
         this._nextPlayer = PlayerEnum.BLUE;
         this._subscribers = [];
-        this._xPadding = wall + space;
-        this._yPadding = wall + space;
-        this._realBoardWidth = width;
-        this._realBoardHeight = height;
 
         this._playerIdToScore = {};
         var p = PlayerEnum.BLUE;
@@ -604,12 +672,12 @@ var Game = (function() {
 
     Engine.prototype.boardWidth = function()
     {
-        return this._realBoardWidth;
+        return this._board.width();
     };
 
     Engine.prototype.boardHeight = function()
     {
-        return this._realBoardHeight;
+        return this._board.height();
     };
 
     Engine.prototype.score = function(player)
@@ -618,11 +686,9 @@ var Game = (function() {
         return this._playerIdToScore[player.id];
     };
 
-    Engine.prototype.at = function(x, y)
+    Engine.prototype.at = function(coordinate)
     {
-        assert(0 <= x && x < this.boardWidth());
-        assert(0 <= y && y < this.boardHeight());
-        return this._board.at(x + this._xPadding, y + this._yPadding);
+        return this._board.at(coordinate);
     };
 
     Engine.prototype.subscribe = function(listener)
@@ -630,27 +696,27 @@ var Game = (function() {
         this._subscribers.push(listener);
     };
 
-    Engine.prototype.playAt = function(x, y)
+    Engine.prototype.playAt = function(coordinate)
     {
-        this.playerPlaysAt(x, y, this._nextPlayer);
+        this.playerPlaysAt(coordinate, this._nextPlayer);
         this._nextPlayer = this._nextPlayer.next();
     };
 
-    Engine.prototype.playerPlaysAt = function(x, y, player)
+    Engine.prototype.playerPlaysAt = function(coordinate, player)
     {
-        assert(this.at(x, y).isUnoccupied(), "Point is already occupied");
-        this.at(x, y).putStone(player);
-        this._notify("playAt", [player, x, y]);
+        assert(coordinate instanceof Coordinate);
+        assert(this.at(coordinate).isUnoccupied(), "Point is already occupied");
+        this.at(coordinate).putStone(player);
+        this._notify("playAt", [player, coordinate]);
 
-        var offset = new Coordinate(1, 0);
+        var offset = new InternalCoord(1, 0);
         var captured = false;
-
-        // TODO: Needs refactoring
-        var point = new Coordinate(x + this._xPadding, y + this._yPadding);
+        // TODO: Bad name. clashes with coordinate
+        var coord = InternalCoord.fromCoordinate(coordinate);
 
         for (var i = 0; i != 4; i++)
         {
-            captured |= this._handleCaptureAt(point.plus(offset), player);
+            captured |= this._handleCaptureAt(coord.plus(offset), player);
             offset.rotateClockwise();
         }
         if (captured)
@@ -662,7 +728,7 @@ var Game = (function() {
             // Check for suicide move
             for (var opponent = player.next(); opponent !== player; opponent = opponent.next())
             {
-                if (this._handleCaptureAt(point, opponent))
+                if (this._handleCaptureAt(coord, opponent))
                 {
                     this._recalculateScore();
                     break;
@@ -693,8 +759,9 @@ var Game = (function() {
 
     Engine.prototype._handleCaptureAt = function(point, player)
     {
+        assert(point instanceof InternalCoord);
         var mask = newMask(this._board.size1(), this._board.size2());
-        var wallFunction = (p) => this._board.at(p.x, p.y).owner() === player; 
+        var wallFunction = (p) => this._board.at(p).owner() === player; 
         flood(point, mask, wallFunction);
 
         if (!this._doMaskCaptures(mask, player))
@@ -707,7 +774,7 @@ var Game = (function() {
 
         // Must be true, because we chose left-most, top-most boundary point
         assert(mask.at(bugStartPoint.x, bugStartPoint.y) === TopologicalKind.INTERIOR);
-        var startDirection = new Coordinate(-1, 0); // Face bug towards the boundary point
+        var startDirection = new InternalCoord(-1, 0); // Face bug towards the boundary point
         var wallFunction = (p) => mask.at(p.x, p.y) === TopologicalKind.BOUNDARY;
         var contour = normalizeContour(runBug(bugStartPoint, startDirection, wallFunction));
 
@@ -719,16 +786,13 @@ var Game = (function() {
         }
         flood(point, territoryMask, (p) => false); // Walls are already encoded in territoryMask
         this._captureByMask(territoryMask, player);
-        this._notify("capture", [player, contour]); // TODO: coordinates should fixed here
+        this._notify("capture", [player, fromInternalCoordArray(contour)]);
 
         return true;
     };
 
     Engine.prototype._doMaskCaptures = function(mask, player)
     {
-        var wall = 1;
-        var space = 1;
-
         if (mask.at(wall, wall) === TopologicalKind.INTERIOR)
         {
             return false;
@@ -738,11 +802,13 @@ var Game = (function() {
 
         var capturedAnyEnemyDots = false;
 
+        // TODO: redo loop bounds
         for (var x = wall + space; x < mask.size1(); x++)
         {
             for (var y = wall + space; y < mask.size2(); y++)
             {
-                var point = this._board.at(x, y);
+                var coordinate = new InternalCoord(x, y);
+                var point = this._board.at(coordinate);
                 if (mask.at(x, y) === TopologicalKind.INTERIOR
                     && point.owner() !== PlayerEnum.NOBODY
                     && point.owner() !== player)
@@ -756,8 +822,6 @@ var Game = (function() {
 
     Engine.prototype._captureByMask = function(mask, player)
     {
-        var wall = 1;
-        var space = 1;
         var xMin = wall + space;
         var xMax = mask.size1() - (wall + space);
         var yMin = wall + space;
@@ -769,7 +833,7 @@ var Game = (function() {
             {
                 if (mask.at(x, y) === TopologicalKind.INTERIOR)
                 {
-                    this._board.at(x, y).setOwner(player);
+                    this._board.at(new InternalCoord(x, y)).setOwner(player);
                 }
             }
         }  
@@ -782,11 +846,11 @@ var Game = (function() {
             this._playerIdToScore[id] = 0;
         }
 
-        for (var x = 0; x < this._board.size1(); x++)
+        for (var x = 0; x < this._board.width(); x++)
         {
-            for (var y = 0; y < this._board.size2(); y++)
+            for (var y = 0; y < this._board.height(); y++)
             {
-                var point = this._board.at(x, y);
+                var point = this._board.at(new Coordinate(x, y));
                 var owner = point.owner();
                 var stone = point.stone();
 
@@ -807,6 +871,17 @@ var Game = (function() {
         INTERIOR: 3
     };
 
+    function fromInternalCoordArray(arrayInternalCoord)
+    {
+        assert(arrayInternalCoord instanceof Array);
+        var coordinateArray = Array(arrayInternalCoord);
+        for (var i = 0; i < coordinateArray.length; i++)
+        {
+            coordinateArray[i] = arrayInternalCoord[i].toCoordinate();
+        }
+        return coordinateArray;
+    }
+
     function leftTopMaskBoundary(mask)
     {
         for (var x = 0; x < mask.size1(); x++)
@@ -815,7 +890,7 @@ var Game = (function() {
             {
                 if (mask.at(x, y) === TopologicalKind.BOUNDARY)
                 {
-                    return new Coordinate(x, y);
+                    return new InternalCoord(x, y);
                 }
             }
         }
@@ -826,7 +901,7 @@ var Game = (function() {
     {
         assert(Number.isInteger(size1) && Number.isInteger(size2));
         
-        var mask = new Array2D(size1, size2, (i, j) => TopologicalKind.EXTERIOR);
+        var mask = new Lib.Array2D(size1, size2, (i, j) => TopologicalKind.EXTERIOR);
 
         for (var x = 0; x < size1; x++)
         {
@@ -845,8 +920,8 @@ var Game = (function() {
 
     function flood(startPoint, mask, wallFunction)
     {
-        assert(startPoint instanceof Coordinate);
-        assert(mask instanceof Array2D);
+        assert(startPoint instanceof InternalCoord);
+        assert(mask instanceof Lib.Array2D);
         assert(wallFunction instanceof Function);
         assert(0 < startPoint.x && startPoint.x < mask.size1() - 1);
         assert(0 < startPoint.y && startPoint.y < mask.size2() - 1);
@@ -857,11 +932,11 @@ var Game = (function() {
         while (toProcess.length > 0)
         {
             var point = toProcess.pop();
-            var offset = new Coordinate(1, 0);
+            var offset = new InternalCoord(1, 0);
 
             for (var i = 0; i < 4; i++)
             {
-                var neighbour = new Coordinate(point.x + offset.x, point.y + offset.y);
+                var neighbour = point.plus(offset);
                 if (mask.at(neighbour.x, neighbour.y) === TopologicalKind.EXTERIOR)
                 {
                     if (wallFunction(neighbour))
@@ -882,8 +957,8 @@ var Game = (function() {
 
     function runBug(startPoint, startDirection, wallFunction)
     {
-        assert(startPoint instanceof Coordinate);
-        assert(startDirection instanceof Coordinate);
+        assert(startPoint instanceof InternalCoord);
+        assert(startDirection instanceof InternalCoord);
         assert(startDirection.squareLength() === 1);
 
         var point = startPoint.clone();
