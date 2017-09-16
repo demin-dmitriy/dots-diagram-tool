@@ -4,10 +4,28 @@
         <title>
             Точечное поле
         </title>
+        <link rel="stylesheet" href="style.css"/>
     </head>
-    <body style="background-color: #fafafa">
-        <div align="center">
-            <canvas id="board" style="background-color: white"> </canvas>
+
+    <body id="body">
+        <div id="workspace">
+            <canvas id="board"></canvas>
+        </div>
+
+        <div id="toolbar">
+            <div>
+                <span class="label">Размер поля</span>
+                <input id="width" type=text></input>
+                <input id="height" type=text></input>
+                <button id="resize">изменить</button>
+            </div>
+            <!-- <div>
+                <span class="label">Размер поля</span>
+                <input id="width" type=text></input>
+                <input id="height" type=text></input>
+                <button>Ok</button>
+            </div> -->
+            
         </div>
         
         <script type="text/javascript" src="Lib.js"></script>

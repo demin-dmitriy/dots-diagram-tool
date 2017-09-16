@@ -8,14 +8,17 @@ var PLAYDOTS_THEME = (function() {
     var redColor = '#D32020';
 
     // TODO: rework this
-    var styles =
+    var dotStyles =
     {
         0: [D.fillStyle(blueColor), D.strokeStyle(blueColor)],
         1: [D.fillStyle(redColor), D.strokeStyle(redColor)]
     };
 
-
-
+    var captureStyles =
+    {
+        0: [D.fillStyle('rgba(35, 88, 237, 0.3)'), D.strokeStyle(blueColor)],
+        1: [D.fillStyle('rgba(211, 32, 32, 0.3)'), D.strokeStyle(redColor)]
+    };
 
     var theme = (ctx) =>
     ({
@@ -26,7 +29,7 @@ var PLAYDOTS_THEME = (function() {
         paddingRight: 20.5,
         paddingBottom: 20.5,
 
-        dot: (player, p) => D.circle(p, 5, ...styles[player.id])(ctx),
+        dot: (player, p) => D.circle(p, 5, ...dotStyles[player.id])(ctx),
 
         setupCanvas: function(width, height)
         {
@@ -37,16 +40,19 @@ var PLAYDOTS_THEME = (function() {
 
         capturePolygon: function(player, points)
         {
-            console.log("drawing polygon", player, points);
             assert(points.length > 0);
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
-            for (var i = 1; i < points.length; i++)
+            D.withStyles(ctx, captureStyles[player.id], () =>
             {
-                ctx.lineTo(points[i].x, points[i].y);
-            }
-            ctx.closePath();
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (var i = 1; i < points.length; i++)
+                {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            });
         },
 
         // setScore
