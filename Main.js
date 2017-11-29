@@ -32,17 +32,17 @@ const Main = (function() {
             this._notify("resize", [ canvas.width, canvas.height ]);
         }
 
-        engine()
+        get engine()
         {
             return this._engine;
         }
 
-        visualizer()
+        get visualizer()
         {
             return this._visualizer;
         }
 
-        selector()
+        get selector()
         {
             return this._selector;
         }
@@ -88,8 +88,8 @@ const Main = (function() {
         const resizeButton = element("resize");
         const widthField = element("width");
         const heightField = element("height");
-        widthField.value = app.engine().boardWidth;
-        heightField.value = app.engine().boardHeight;
+        widthField.value = app.engine.boardWidth;
+        heightField.value = app.engine.boardHeight;
 
         resizeButton.addEventListener("click", function(event)
         {
@@ -108,35 +108,35 @@ const Main = (function() {
 
         element("left-").addEventListener("click", function(event)
         {
-            app.selector().left -= 1;
+            app.selector.left -= 1;
         });
         element("left+").addEventListener("click", function(event)
         {
-            app.selector().left += 1;
+            app.selector.left += 1;
         });
         element("right-").addEventListener("click", function(event)
         {
-            app.selector().right -= 1;
+            app.selector.right -= 1;
         });
         element("right+").addEventListener("click", function(event)
         {
-            app.selector().right += 1;
+            app.selector.right += 1;
         });
         element("top-").addEventListener("click", function(event)
         {
-            app.selector().top -= 1;
+            app.selector.top -= 1;
         });
         element("top+").addEventListener("click", function(event)
         {
-            app.selector().top += 1;
+            app.selector.top += 1;
         });
         element("bottom-").addEventListener("click", function(event)
         {
-            app.selector().bottom -= 1;
+            app.selector.bottom -= 1;
         });
         element("bottom+").addEventListener("click", function(event)
         {
-            app.selector().bottom += 1;
+            app.selector.bottom += 1;
         });
 
         app.subscribe({
