@@ -7,12 +7,23 @@
     overflow: auto;
     position: absolute;
     right: 400px;
+    /*height: 1000px; /*  */*/
 }
 
 #board {
     background-color: white;
+    position: absolute;
     display: table;
+    left: 0;
+    right: 0;
     margin: 0 auto;
+}
+
+#overlay {
+    position: absolute;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
 }
 
 #toolbar {
@@ -63,4 +74,27 @@ input {
 #width, #height {
     width: 23px;
     text-align: center;
+}
+
+.block {
+    margin-bottom: 15px;
+/*    border-bottom-style: solid;
+    border-bottom-width: 1px;*/
+}
+
+div.history {
+    margin-top: 5px;
+    overflow: auto;
+}
+
+div.history div {
+    float: left;
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    border-style: solid;
+    border-color: #747474;
+    border-width: 1px;
+    text-align: center;
+    margin-right: 1px;
 }

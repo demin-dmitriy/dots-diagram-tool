@@ -10,29 +10,46 @@
     <body id="body">
         <div id="workspace">
             <canvas id="board"></canvas>
+            <canvas id="overlay"></canvas>
         </div>
 
         <div id="toolbar">
-            <div>
+            <div class="block">
                 <span class="label">Размер поля</span>
                 <input id="width" type=text></input>
                 <input id="height" type=text></input>
                 <button id="resize">изменить</button>
             </div>
-            <!-- <div>
-                <span class="label">Размер поля</span>
-                <input id="width" type=text></input>
-                <input id="height" type=text></input>
-                <button>Ok</button>
-            </div> -->
-            
+            <div class="block">
+                <span class="label">Граница области</span>
+                <div>
+                    <span class="label">Левая</span><button id="left-">-</button><button id="left+">+</button>
+                    <span class="label">Правая</span><button id="right-">-</button><button id="right+">+</button>
+                </div>
+                <div>
+                    <span class="label">Верхняя</span><button id="top-">-</button><button id="top+">+</button>
+                    <span class="label">Нижняя</span><button id="bottom-">-</button><button id="bottom+">+</button>
+                </div>
+            </div>
+            <div class="block">
+                <span class="label">История</span>
+                <div class="history">
+                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
+                    <div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+                </div>
+            </div>
         </div>
         
+        
+        <script type="text/javascript" src="lib/gif.worker.js"></script>
+        <script type="text/javascript" src="lib/gif.js"></script>
+
         <script type="text/javascript" src="Lib.js"></script>
         <script type="text/javascript" src="Drawing.js"></script>
         <script type="text/javascript" src="PlaydotsTheme.js"></script>
         <script type="text/javascript" src="Visualizer.js"></script>
         <script type="text/javascript" src="Game.js"></script>
+        <script type="text/javascript" src="Selector.js"></script>
         <script type="text/javascript" src="Main.js"></script>
 
         <script type="text/javascript">
