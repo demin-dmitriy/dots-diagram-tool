@@ -1,4 +1,4 @@
-var Lib = (function() {
+let Lib = (function() {
 
     "use strict";
 
@@ -17,117 +17,147 @@ var Lib = (function() {
             return;
         }
 
-        for (var i = 0; i < fs.length; i++)
+        for (let i = 0; i < fs.length; i++)
         {
             fs[i](arg);
         }
     }
 
-    function Array2D(size1, size2, valueFunction)
+    class Array2D
     {
-        var array = new Array(size1 * size2);
-
-        this._size1 = size1;
-        this._size2 = size2;
-
-        for (var i = 0; i < size1; i++)
+        constructor(size1, size2, valueFunction)
         {
-            for (var j = 0; j < size2; j++)
+            let array = new Array(size1 * size2);
+
+            this._size1 = size1;
+            this._size2 = size2;
+
+            for (let i = 0; i < size1; i++)
             {
-                array[this._index(i, j)] = valueFunction(i, j);
+                for (let j = 0; j < size2; j++)
+                {
+                    array[this._index(i, j)] = valueFunction(i, j);
+                }
             }
+
+            this._data = array;
         }
 
-        this._data = array;
+        _index(i, j)
+        {
+            return i * this._size2 + j;
+        }
+
+        assertInBounds(i, j)
+        {
+            assert(Number.isInteger(i) && Number.isInteger(j), "Index must be ineger");
+            assert(0 <= i && i < this._size1 && 0 <= j && j < this._size2, "Invalid index");
+        }
+
+        get size1()
+        {
+            return this._size1;
+        }
+
+        get size2()
+        {
+            return this._size2;
+        }
+
+        at(i, j)
+        {
+            this.assertInBounds(i, j);
+            return this._data[this._index(i, j)];
+        }
+
+        set(i, j, v)
+        {
+            this.assertInBounds(i, j);
+            this._data[this._index(i, j)] = v;
+        }
     }
 
-    Array2D.prototype._index = function(i, j)
-    {
-        return i * this._size2 + j;
-    };
 
-    Array2D.prototype.assertInBounds = function(i, j)
+    class Point
     {
-        assert(Number.isInteger(i) && Number.isInteger(j), "Index must be ineger");
-        assert(0 <= i && i < this._size1 && 0 <= j && j < this._size2, "Invalid index");
-    };
+        constructor(x, y)
+        {
+            this.x = x;
+            this.y = y;
+        }
 
-    Array2D.prototype.size1 = function()
-    {
-        return this._size1;
-    };
+        rotateClockwise()
+        {
+            let x = this.y;
+            let y = -this.x;
+            this.x = x;
+            this.y = y;
+        }
 
-    Array2D.prototype.size2 = function()
-    {
-        return this._size2;
-    };
+        rotateCounterClockwise()
+        {
+            let x = -this.y;
+            let y = this.x;
+            this.x = x;
+            this.y = y;
+        }
 
-    Array2D.prototype.at = function(i, j)
-    {
-        this.assertInBounds(i, j);
-        return this._data[this._index(i, j)];
-    };
+        squareLength()
+        {
+            return this.x * this.x + this.y * this.y;
+        }
 
-    Array2D.prototype.set = function(i, j, v)
-    {
-        this.assertInBounds(i, j);
-        this._data[this._index(i, j)] = v;
-    };
+        clone()
+        {
+            return new this.constructor(this.x, this.y);
+        }
 
-    function Point(x, y)
-    {
-        this.x = x;
-        this.y = y;
+        equals(other)
+        {
+            return this.x === other.x && this.y === other.y;
+        }
+
+        plus(other)
+        {
+            return new this.constructor(this.x + other.x, this.y + other.y);
+        }
+
+        negative()
+        {
+            return new this.constructor(-this.x, -this.y);
+        }
     }
 
-    Point.prototype.rotateClockwise = function()
-    {
-        var x = this.y;
-        var y = -this.x;
-        this.x = x;
-        this.y = y;
-    };
 
-    Point.prototype.rotateCounterClockwise = function()
+    class Subscribable
     {
-        var x = -this.y;
-        var y = this.x;
-        this.x = x;
-        this.y = y;
-    };
+        constructor()
+        {
+            this._subscribers = [];
+        }
 
-    Point.prototype.squareLength = function()
-    {
-        return this.x * this.x + this.y * this.y;
-    };
+        subscribe(listener)
+        {
+            this._subscribers.push(listener);
+        }
 
-    Point.prototype.clone = function()
-    {
-        return new this.constructor(this.x, this.y);
-    };
-
-    Point.prototype.equals = function(other)
-    {
-        return this.x === other.x && this.y === other.y;
-    };
-
-    Point.prototype.plus = function(other)
-    {
-        return new this.constructor(this.x + other.x, this.y + other.y);
-    };
-
-    Point.prototype.negative = function()
-    {
-        return new this.constructor(-this.x, -this.y);
-    };
+        _notify(name, args)
+        {
+            for (let i = 0; i < this._subscribers.length; i++)
+            {
+                this._subscribers[i][name](...args);
+            }
+        }
+    }
 
     return {
         assert: assert,
         apply: apply,
         Array2D: Array2D,
         Point: Point,
+        Subscribable: Subscribable,
     };
 
 }());
 
-var assert = Lib.assert;
+let assert = Lib.assert;

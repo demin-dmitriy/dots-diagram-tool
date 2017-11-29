@@ -1,16 +1,16 @@
-var Game = (function() {
+let Game = (function() {
     
     "use strict";
 
 
-    var wall = 1;
-    var space = 1;
+    let wall = 1;
+    let space = 1;
 
 
     function Nobody() { }                 /* local */
     function Player(id) { this.id = id; } /* local */
 
-    var PlayerEnum = {
+    let PlayerEnum = {
         NOBODY: new Nobody(),
         BLUE: new Player(0),
         RED: new Player(1)
@@ -26,341 +26,335 @@ var Game = (function() {
     };
 
 
-    function Coordinate(x, y)
+    class Coordinate extends Lib.Point
     {
-        assert(Number.isInteger(x) && Number.isInteger(y), "Coordinates must be integer");
-        assert(x >= 0 && y >= 0);
-        Lib.Point.call(this, x, y);
+        constructor(x, y)
+        {
+            assert(Number.isInteger(x) && Number.isInteger(y), "Coordinates must be integer");
+            assert(x >= 0 && y >= 0);
+            super(x, y);
+        }
     }
-
-    Coordinate.prototype = Object.create(Lib.Point.prototype);
-    Coordinate.prototype.constructor = Coordinate;
-
 
     /* local */
-    function InternalCoord(x, y)
+    class InternalCoord extends Lib.Point
     {
-        assert(Number.isInteger(x) && Number.isInteger(y), "Coordinates must be integer");
-        Lib.Point.call(this, x, y);
-    }
-
-    InternalCoord.prototype = Object.create(Lib.Point.prototype);
-    InternalCoord.prototype.constructor = InternalCoord;
-
-    InternalCoord.fromCoordinate = function(coordinate)
-    {
-        assert(coordinate instanceof Coordinate);
-        return new InternalCoord(wall + space + coordinate.x, wall + space + coordinate.y);
-    };
-
-    InternalCoord.prototype.toCoordinate = function()
-    {
-        return new Coordinate(this.x - (wall + space), this.y - (wall + space));
-    };
-
-
-    function Point()
-    {
-        this._stone = PlayerEnum.NOBODY;
-        this._owner = PlayerEnum.NOBODY;
-    }
-
-    Point.prototype.stone = function()
-    {
-        return this._stone;
-    };
-
-    Point.prototype.owner = function()
-    {
-        return this._owner;
-    };
-
-    Point.prototype.isUnoccupied = function()
-    {
-        return this._owner === PlayerEnum.NOBODY;
-    };
-
-    Point.prototype.putStone = function(player)
-    {
-        assert(this._owner === PlayerEnum.NOBODY, "Point is already occupied");
-        assert(this._stone === PlayerEnum.NOBODY, "1) Invalid state; 2) Point is already occupied");
-        assert(player instanceof Player);
-
-        this._owner = player;
-        this._stone = player;
-    };
-
-    Point.prototype.setOwner = function(player)
-    {
-        assert(player instanceof Player);
-        this._owner = player;
-    };
-
-
-    function Board(width, height)
-    {
-        assert(Number.isInteger(width) && Number.isInteger(height));
-        Lib.Array2D.call
-        (
-            this,
-            wall + space + width + space + wall,
-            wall + space + height + space + wall,
-            (i, j) => new Point()
-        );
-        this._width = width;
-        this._height = height;
-    }
-
-    Board.prototype = Object.create(Lib.Array2D.prototype);
-    Board.prototype.constructor = Board;    
-
-    Board.prototype._convertCoordinate = function(anyCoordinate)
-    {
-        if (anyCoordinate instanceof Coordinate)
+        constructor(x, y)
         {
-            assert(0 <= anyCoordinate.x && anyCoordinate.x < this._width);
-            assert(0 <= anyCoordinate.y && anyCoordinate.y < this._height);
-            return InternalCoord.fromCoordinate(anyCoordinate);
+            assert(Number.isInteger(x) && Number.isInteger(y), "Coordinates must be integer");
+            super(x, y);
         }
-        assert(anyCoordinate instanceof InternalCoord,
-               "Invalid argument type: Must be a Coordinate or InternalCoord");
-        return anyCoordinate;
-    };
 
-    Board.prototype.at = function(anyCoordinate)
-    {
-        var internalCoord = this._convertCoordinate(anyCoordinate);
-        return Lib.Array2D.prototype.at.call(this, internalCoord.x, internalCoord.y);
-    };
-
-    Board.prototype.set = function(anyCoordinate, value)
-    {
-        var internalCoord = this._convertCoordinate(anyCoordinate);
-        return Lib.Array2D.prototype.set.call(this, internalCoord.x, internalCoord.y, value);
-    };
-
-    Board.prototype.width = function()
-    {
-        return this._width;
-    };
-
-    Board.prototype.height = function()
-    {
-        return this._height;
-    };
-
-
-    function Engine(width, height)
-    {
-        this._board = new Board(width, height);
-        this._nextPlayer = PlayerEnum.BLUE;
-        this._subscribers = [];
-
-        this._playerIdToScore = {};
-        var p = PlayerEnum.BLUE;
-        do
+        static fromCoordinate(coordinate)
         {
-            this._playerIdToScore[p.id] = 0;
-            p = p.next();
-        } while (p !== PlayerEnum.BLUE);
+            assert(coordinate instanceof Coordinate);
+            return new InternalCoord(wall + space + coordinate.x, wall + space + coordinate.y);
+        }
+
+        toCoordinate()
+        {
+            return new Coordinate(this.x - (wall + space), this.y - (wall + space));
+        }
     }
 
-    Engine.prototype.boardWidth = function()
+    class Point
     {
-        return this._board.width();
-    };
-
-    Engine.prototype.boardHeight = function()
-    {
-        return this._board.height();
-    };
-
-    Engine.prototype.score = function(player)
-    {
-        assert(player instanceof Player);
-        return this._playerIdToScore[player.id];
-    };
-
-    Engine.prototype.at = function(coordinate)
-    {
-        return this._board.at(coordinate);
-    };
-
-    Engine.prototype.subscribe = function(listener)
-    {
-        this._subscribers.push(listener);
-    };
-
-    Engine.prototype.playAt = function(coordinate)
-    {
-        this.playerPlaysAt(coordinate, this._nextPlayer);
-        this._nextPlayer = this._nextPlayer.next();
-    };
-
-    Engine.prototype.playerPlaysAt = function(coordinate, player)
-    {
-        assert(coordinate instanceof Coordinate);
-        assert(this.at(coordinate).isUnoccupied(), "Point is already occupied");
-        this.at(coordinate).putStone(player);
-        this._notify("playAt", [player, coordinate]);
-
-        var offset = new InternalCoord(1, 0);
-        var captured = false;
-        // TODO: Bad name. clashes with coordinate
-        var coord = InternalCoord.fromCoordinate(coordinate);
-
-        for (var i = 0; i != 4; i++)
+        constructor()
         {
-            captured |= this._handleCaptureAt(coord.plus(offset), player);
-            offset.rotateClockwise();
+            this._stone = PlayerEnum.NOBODY;
+            this._owner = PlayerEnum.NOBODY;
         }
-        if (captured)
+
+        get stone()
         {
-            this._recalculateScore();
+            return this._stone;
         }
-        else
+
+        get owner()
         {
-            // Check for suicide move
-            for (var opponent = player.next(); opponent !== player; opponent = opponent.next())
+            return this._owner;
+        }
+
+        set owner(player)
+        {
+            assert(player instanceof Player);
+            this._owner = player;
+        }
+
+        isUnoccupied()
+        {
+            return this._owner === PlayerEnum.NOBODY;
+        }
+
+        putStone(player)
+        {
+            assert(this._owner === PlayerEnum.NOBODY, "Point is already occupied");
+            assert(this._stone === PlayerEnum.NOBODY, "1) Invalid state; 2) Point is already occupied");
+            assert(player instanceof Player);
+
+            this._owner = player;
+            this._stone = player;
+        }
+    }
+
+    class Board extends Lib.Array2D
+    {
+        constructor(width, height)
+        {
+            assert(Number.isInteger(width) && Number.isInteger(height));
+            super
+            (
+                wall + space + width + space + wall,
+                wall + space + height + space + wall,
+                (i, j) => new Point()
+            );
+            this._width = width;
+            this._height = height;
+        }
+
+        _convertCoordinate(anyCoordinate)
+        {
+            if (anyCoordinate instanceof Coordinate)
             {
-                if (this._handleCaptureAt(coord, opponent))
+                assert(0 <= anyCoordinate.x && anyCoordinate.x < this._width);
+                assert(0 <= anyCoordinate.y && anyCoordinate.y < this._height);
+                return InternalCoord.fromCoordinate(anyCoordinate);
+            }
+            assert(anyCoordinate instanceof InternalCoord,
+                   "Invalid argument type: Must be a Coordinate or InternalCoord");
+            return anyCoordinate;
+        }
+
+        at(anyCoordinate)
+        {
+            let internalCoord = this._convertCoordinate(anyCoordinate);
+            return super.at(internalCoord.x, internalCoord.y);
+        }
+
+        set(anyCoordinate, value)
+        {
+            let internalCoord = this._convertCoordinate(anyCoordinate);
+            return super.set(this, internalCoord.x, internalCoord.y, value);
+        }
+
+        get width()
+        {
+            return this._width;
+        }
+
+        get height()
+        {
+            return this._height;
+        }
+    }
+
+    class Engine extends Lib.Subscribable
+    {
+        constructor(width, height)
+        {
+            super();
+            this._board = new Board(width, height);
+            this._nextPlayer = PlayerEnum.BLUE;
+
+            this._playerIdToScore = {};
+            let p = PlayerEnum.BLUE;
+            do
+            {
+                this._playerIdToScore[p.id] = 0;
+                p = p.next();
+            } while (p !== PlayerEnum.BLUE);
+        }
+
+        get boardWidth()
+        {
+            return this._board.width;
+        }
+
+        get boardHeight()
+        {
+            return this._board.height;
+        }
+
+        score(player)
+        {
+            assert(player instanceof Player);
+            return this._playerIdToScore[player.id];
+        }
+
+        at(coordinate)
+        {
+            return this._board.at(coordinate);
+        }
+
+        playAt(coordinate)
+        {
+            this.playerPlaysAt(coordinate, this._nextPlayer);
+            this._nextPlayer = this._nextPlayer.next();
+        }
+
+        playerPlaysAt(coordinate, player)
+        {
+            assert(coordinate instanceof Coordinate);
+            assert(this.at(coordinate).isUnoccupied(), "Point is already occupied");
+            this.at(coordinate).putStone(player);
+            this._notify("playAt", [player, coordinate]);
+
+            let offset = new InternalCoord(1, 0);
+            let captured = false;
+            // TODO: Bad name. clashes with coordinate
+            let coord = InternalCoord.fromCoordinate(coordinate);
+
+            for (let i = 0; i != 4; i++)
+            {
+                captured |= this._handleCaptureAt(coord.plus(offset), player);
+                offset.rotateClockwise();
+            }
+            if (captured)
+            {
+                this._recalculateScore();
+            }
+            else
+            {
+                // Check for suicide move
+                for (let opponent = player.next(); opponent !== player; opponent = opponent.next())
                 {
-                    this._recalculateScore();
-                    break;
+                    if (this._handleCaptureAt(coord, opponent))
+                    {
+                        this._recalculateScore();
+                        break;
+                    }
                 }
             }
+
         }
 
-    };
-
-    Engine.prototype.currentPlayer = function()
-    {
-        return this._currentPlayer;
-    };
-
-    Engine.prototype.setCurrentPlayer = function(player)
-    {
-        assert(player instanceof Player);
-        this._currentPlayer = player;
-    };
-
-    Engine.prototype._notify = function(name, args)
-    {
-        for (var i = 0; i < this._subscribers.length; i++)
+        currentPlayer()
         {
-            this._subscribers[i][name](...args);
+            return this._currentPlayer;
         }
-    };
 
-    Engine.prototype._handleCaptureAt = function(point, player)
-    {
-        assert(point instanceof InternalCoord);
-        var mask = newMask(this._board.size1(), this._board.size2());
-        var wallFunction = (p) => this._board.at(p).owner() === player; 
-        flood(point, mask, wallFunction);
-
-        if (!this._doMaskCaptures(mask, player))
+        setCurrentPlayer(player)
         {
+            assert(player instanceof Player);
+            this._currentPlayer = player;
+        }
+
+        _handleCaptureAt(point, player)
+        {
+            assert(point instanceof InternalCoord);
+
+            // 1. Check if a `point` is surrounded by `player` and classify all points as BOUNDARY/INTERIOR/EXTERIOR
+            let mask = new Mask(this._board.size1, this._board.size2);
+
+            let ownColorPredicate = (p) => this._board.at(p).owner === player; 
+            flood(point, mask, ownColorPredicate);
+
+            if (!this._doMaskCaptures(mask, player))
+            {
+                return false;
+            }
+
+            // 2. Run bug to find capturing contour
+            let bugStartPoint = leftTopMaskBoundary(mask);
+            bugStartPoint.x += 1;
+
+            // Must be true, because we chose left-most, top-most boundary point
+            assert(mask.at(bugStartPoint.x, bugStartPoint.y) === TopologicalKind.INTERIOR);
+            let startDirection = new InternalCoord(-1, 0); // Face bug towards the boundary point
+            let boundaryPredicate = (p) => mask.at(p.x, p.y) === TopologicalKind.BOUNDARY;
+            let contour = normalizeContour(runBug(bugStartPoint, startDirection, boundaryPredicate));
+
+            // 3. Find all interior points of capture
+            let territoryMask = new Mask(mask.size1, mask.size2);
+            for (let i = 0; i < contour.length; i++)
+            {
+                let contourPoint = contour[i];
+                territoryMask.set(contourPoint.x, contourPoint.y, TopologicalKind.BOUNDARY);
+            }
+            flood(point, territoryMask, (p) => false); // Walls are already encoded in territoryMask
+
+            // 4. Actually perform capture: update board and notify anyone who wants to draw
+            this._captureByMask(territoryMask, player);
+            this._notify("capture", [player, fromInternalCoordArray(contour)]);
+
+            return true;
+        }
+
+        _doMaskCaptures(mask, player)
+        {
+            if (mask.at(wall, wall) === TopologicalKind.INTERIOR)
+            {
+                return false;
+            }
+
+            // There is a closed contour, but we need to check, if it captured any dots.
+
+            let capturedAnyEnemyDots = false;
+
+            // TODO: redo loop bounds
+            for (let x = wall + space; x < mask.size1; x++)
+            {
+                for (let y = wall + space; y < mask.size2; y++)
+                {
+                    let coordinate = new InternalCoord(x, y);
+                    let point = this._board.at(coordinate);
+                    if (mask.at(x, y) === TopologicalKind.INTERIOR
+                        && point.owner !== PlayerEnum.NOBODY
+                        && point.owner !== player)
+                    {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
-        var bugStartPoint = leftTopMaskBoundary(mask);
-        bugStartPoint.x += 1;
-
-        // Must be true, because we chose left-most, top-most boundary point
-        assert(mask.at(bugStartPoint.x, bugStartPoint.y) === TopologicalKind.INTERIOR);
-        var startDirection = new InternalCoord(-1, 0); // Face bug towards the boundary point
-        var wallFunction = (p) => mask.at(p.x, p.y) === TopologicalKind.BOUNDARY;
-        var contour = normalizeContour(runBug(bugStartPoint, startDirection, wallFunction));
-
-        var territoryMask = newMask(mask.size1(), mask.size2());
-        for (var i = 0; i < contour.length; i++)
+        _captureByMask(mask, player)
         {
-            var contourPoint = contour[i];
-            territoryMask.set(contourPoint.x, contourPoint.y, TopologicalKind.BOUNDARY);
-        }
-        flood(point, territoryMask, (p) => false); // Walls are already encoded in territoryMask
-        this._captureByMask(territoryMask, player);
-        this._notify("capture", [player, fromInternalCoordArray(contour)]);
+            let xMin = wall + space;
+            let xMax = mask.size1 - (wall + space);
+            let yMin = wall + space;
+            let yMax = mask.size2 - (wall + space);
 
-        return true;
-    };
-
-    Engine.prototype._doMaskCaptures = function(mask, player)
-    {
-        if (mask.at(wall, wall) === TopologicalKind.INTERIOR)
-        {
-            return false;
-        }
-
-        // There is a closed contour, but we need to check, if it captured any dots.
-
-        var capturedAnyEnemyDots = false;
-
-        // TODO: redo loop bounds
-        for (var x = wall + space; x < mask.size1(); x++)
-        {
-            for (var y = wall + space; y < mask.size2(); y++)
+            for (let x = xMin; x < xMax; x++)
             {
-                var coordinate = new InternalCoord(x, y);
-                var point = this._board.at(coordinate);
-                if (mask.at(x, y) === TopologicalKind.INTERIOR
-                    && point.owner() !== PlayerEnum.NOBODY
-                    && point.owner() !== player)
+                for (let y = yMin; y < yMax; y++)
                 {
-                    return true;
+                    if (mask.at(x, y) === TopologicalKind.INTERIOR)
+                    {
+                        this._board.at(new InternalCoord(x, y)).owner = player;
+                    }
                 }
             }
         }
-        return false;
-    };
 
-    Engine.prototype._captureByMask = function(mask, player)
-    {
-        var xMin = wall + space;
-        var xMax = mask.size1() - (wall + space);
-        var yMin = wall + space;
-        var yMax = mask.size2() - (wall + space);
-
-        for (var x = xMin; x < xMax; x++)
+        _recalculateScore()
         {
-            for (var y = yMin; y < yMax; y++)
+            for (let id in this._playerIdToScore)
             {
-                if (mask.at(x, y) === TopologicalKind.INTERIOR)
+                this._playerIdToScore[id] = 0;
+            }
+
+            for (let x = 0; x < this._board.width; x++)
+            {
+                for (let y = 0; y < this._board.height; y++)
                 {
-                    this._board.at(new InternalCoord(x, y)).setOwner(player);
+                    let point = this._board.at(new Coordinate(x, y));
+                    let owner = point.owner;
+                    let stone = point.stone;
+
+                    if (owner !== PlayerEnum.NOBODY && stone !== PlayerEnum.NOBODY && owner !== stone)
+                    {
+                        this._playerIdToScore[owner.id] += 1;
+                    }
                 }
             }
-        }  
+            this._notify("updateScore", [this._playerIdToScore]);
+        }
     }
-
-    Engine.prototype._recalculateScore = function()
-    {
-        for (var id in this._playerIdToScore)
-        {
-            this._playerIdToScore[id] = 0;
-        }
-
-        for (var x = 0; x < this._board.width(); x++)
-        {
-            for (var y = 0; y < this._board.height(); y++)
-            {
-                var point = this._board.at(new Coordinate(x, y));
-                var owner = point.owner();
-                var stone = point.stone();
-
-                if (owner !== PlayerEnum.NOBODY && stone !== PlayerEnum.NOBODY && owner !== stone)
-                {
-                    this._playerIdToScore[owner.id] += 1;
-                }
-            }
-        }
-        this._notify("updateScore", [this._playerIdToScore]);
-    };
-
 
     // ... Move up?
-    var TopologicalKind = {
+    let TopologicalKind = {
         EXTERIOR: 1,
         BOUNDARY: 2,
         INTERIOR: 3
@@ -369,8 +363,8 @@ var Game = (function() {
     function fromInternalCoordArray(arrayInternalCoord)
     {
         assert(arrayInternalCoord instanceof Array);
-        var coordinateArray = Array(arrayInternalCoord.length);
-        for (var i = 0; i < coordinateArray.length; i++)
+        let coordinateArray = Array(arrayInternalCoord.length);
+        for (let i = 0; i < coordinateArray.length; i++)
         {
             coordinateArray[i] = arrayInternalCoord[i].toCoordinate();
         }
@@ -379,9 +373,9 @@ var Game = (function() {
 
     function leftTopMaskBoundary(mask)
     {
-        for (var x = 0; x < mask.size1(); x++)
+        for (let x = 0; x < mask.size1; x++)
         {
-            for (var y = 0; y < mask.size2(); y++)
+            for (let y = 0; y < mask.size2; y++)
             {
                 if (mask.at(x, y) === TopologicalKind.BOUNDARY)
                 {
@@ -392,46 +386,47 @@ var Game = (function() {
         assert(false, "No boundary points in mask");
     }
 
-    function newMask(size1, size2)
+    class Mask extends Lib.Array2D
     {
-        assert(Number.isInteger(size1) && Number.isInteger(size2));
-        
-        var mask = new Lib.Array2D(size1, size2, (i, j) => TopologicalKind.EXTERIOR);
-
-        for (var x = 0; x < size1; x++)
+        constructor(size1, size2)
         {
-            mask.set(x, 0, TopologicalKind.INTERIOR);
-            mask.set(x, size2 - 1, TopologicalKind.INTERIOR);
-        }
+            assert(Number.isInteger(size1) && Number.isInteger(size2));
 
-        for (var y = 0; y < size2; y++)
-        {
-            mask.set(0, y, TopologicalKind.INTERIOR);
-            mask.set(size1 - 1, y, TopologicalKind.INTERIOR);
-        }
+            super(size1, size2, (i, j) => TopologicalKind.EXTERIOR);
 
-        return mask;
+            for (let x = 0; x < size1; x++)
+            {
+                this.set(x, 0, TopologicalKind.INTERIOR);
+                this.set(x, size2 - 1, TopologicalKind.INTERIOR);
+            }
+
+            for (let y = 0; y < size2; y++)
+            {
+                this.set(0, y, TopologicalKind.INTERIOR);
+                this.set(size1 - 1, y, TopologicalKind.INTERIOR);
+            }
+        }
     }
 
     function flood(startPoint, mask, wallFunction)
     {
         assert(startPoint instanceof InternalCoord);
-        assert(mask instanceof Lib.Array2D);
+        assert(mask instanceof Mask);
         assert(wallFunction instanceof Function);
-        assert(0 < startPoint.x && startPoint.x < mask.size1() - 1);
-        assert(0 < startPoint.y && startPoint.y < mask.size2() - 1);
+        assert(0 < startPoint.x && startPoint.x < mask.size1 - 1);
+        assert(0 < startPoint.y && startPoint.y < mask.size2 - 1);
         mask.set(startPoint.x, startPoint.y, TopologicalKind.INTERIOR);
  
-        var toProcess = [ startPoint ];
+        let toProcess = [ startPoint ];
 
         while (toProcess.length > 0)
         {
-            var point = toProcess.pop();
-            var offset = new InternalCoord(1, 0);
+            let point = toProcess.pop();
+            let offset = new InternalCoord(1, 0);
 
-            for (var i = 0; i < 4; i++)
+            for (let i = 0; i < 4; i++)
             {
-                var neighbour = point.plus(offset);
+                let neighbour = point.plus(offset);
                 if (mask.at(neighbour.x, neighbour.y) === TopologicalKind.EXTERIOR)
                 {
                     if (wallFunction(neighbour))
@@ -456,14 +451,14 @@ var Game = (function() {
         assert(startDirection instanceof InternalCoord);
         assert(startDirection.squareLength() === 1);
 
-        var point = startPoint.clone();
-        var direction = startDirection.clone();
+        let point = startPoint.clone();
+        let direction = startDirection.clone();
 
-        var contour = [];
+        let contour = [];
 
         do
         {
-            var pointInFront = point.plus(direction);
+            let pointInFront = point.plus(direction);
             if (wallFunction(pointInFront))
             {
                 contour.push(pointInFront);
@@ -481,19 +476,20 @@ var Game = (function() {
 
     function normalizeContour(contour)
     {
-        var normalizedContour = [];
-        var contourPoints = new Set();
+        // I don't remember now, but it's probably important that first point in contour will remain after normalization
+        let normalizedContour = [];
+        let contourPoints = new Set();
 
-        var key = (point) => point.x + ";" + point.y;
+        let key = (point) => point.x + ";" + point.y;
 
-        for (var i = 0; i < contour.length; i++)
+        for (let i = 0; i < contour.length; i++)
         {
-            var point = contour[i];
-            var pointKey = key(point);
+            let point = contour[i];
+            let pointKey = key(point);
 
             while (contourPoints.has(pointKey))
             {
-                var redundantPoint = normalizedContour.pop();
+                let redundantPoint = normalizedContour.pop();
                 assert(contourPoints.has(key(redundantPoint)));
                 contourPoints.delete(key(redundantPoint));
             }

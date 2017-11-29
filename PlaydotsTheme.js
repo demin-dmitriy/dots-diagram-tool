@@ -1,59 +1,70 @@
-var PLAYDOTS_THEME = (function() {
+let PLAYDOTS_THEME = (function() {
 
     "use strict";
 
-    var D = Drawing;
+    let D = Drawing;
 
-    var blueColor = '#2358ED';
-    var redColor = '#D32020';
+    let blueColor = '#2358ED';
+    let redColor = '#D32020';
+    let dimColor = 'rgba(0, 0, 0, 0.15)'
 
     // TODO: rework this
-    var dotStyles =
+    let dotStyles =
     {
         0: [D.fillStyle(blueColor), D.strokeStyle(blueColor)],
         1: [D.fillStyle(redColor), D.strokeStyle(redColor)]
     };
 
-    var captureStyles =
+    let captureStyles =
     {
         0: [D.fillStyle('rgba(35, 88, 237, 0.3)'), D.strokeStyle(blueColor)],
         1: [D.fillStyle('rgba(211, 32, 32, 0.3)'), D.strokeStyle(redColor)]
     };
 
-    var theme = (ctx) =>
+    let theme = (boardCtx, selectorCtx) =>
     ({
-        gridLine: (p1, p2) => D.line(p1, p2, D.lineWidth(0), D.strokeStyle('#E1E6EB'))(ctx),
+        gridLine: (p1, p2) => D.line(p1, p2, D.lineWidth(0), D.strokeStyle('#E1E6EB'))(boardCtx),
         gridStep: 19,
         paddingLeft: 20.5,
         paddingTop: 20.5,
         paddingRight: 20.5,
         paddingBottom: 20.5,
 
-        dot: (player, p) => D.circle(p, 5, ...dotStyles[player.id])(ctx),
+        dot: (player, p) => D.circle(p, 5, ...dotStyles[player.id])(boardCtx),
 
-        setupCanvas: function(width, height)
+        setupCanvas: (width, height) =>
         {
             // TODO: we maybe need to fill canvas
-            ctx.canvas.width = width;
-            ctx.canvas.height = height;
+            boardCtx.canvas.width = width;
+            boardCtx.canvas.height = height;
+            selectorCtx.canvas.width = width;
+            selectorCtx.canvas.height = height;
         },
 
-        capturePolygon: function(player, points)
+        capturePolygon: (player, points) =>
         {
             assert(points.length > 0);
-            D.withStyles(ctx, captureStyles[player.id], () =>
+            D.withStyles(boardCtx, captureStyles[player.id], () =>
             {
-                ctx.beginPath();
-                ctx.moveTo(points[0].x, points[0].y);
-                for (var i = 1; i < points.length; i++)
+                boardCtx.beginPath();
+                boardCtx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++)
                 {
-                    ctx.lineTo(points[i].x, points[i].y);
+                    boardCtx.lineTo(points[i].x, points[i].y);
                 }
-                ctx.closePath();
-                ctx.stroke();
-                ctx.fill();
+                boardCtx.closePath();
+                boardCtx.stroke();
+                boardCtx.fill();
             });
         },
+
+        selectRect: (rect) =>
+        {
+            selectorCtx.fillStyle = dimColor;
+            selectorCtx.clearRect(0, 0, selectorCtx.canvas.width, selectorCtx.canvas.height);
+            selectorCtx.fillRect(0, 0, selectorCtx.canvas.width, selectorCtx.canvas.height);
+            selectorCtx.clearRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+        }
 
         // setScore
     });
