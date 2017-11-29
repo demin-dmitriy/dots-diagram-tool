@@ -2,11 +2,22 @@ const Main = (function() {
 
     "use strict";
 
+    function createCanvas(node, name)
+    {
+        const canvas = document.createElement("canvas");
+        canvas.setAttribute("id", name);
+        node.appendChild(canvas);
+        return canvas;
+    }
+
     class App extends Lib.Subscribable
     {
-        constructor(boardCanvas, overlayCanvas, initWidth, initHeight)
+        constructor(workspace, initWidth, initHeight)
         {
             super();
+
+            const boardCanvas = createCanvas(workspace, "board");
+            const overlayCanvas = createCanvas(workspace, "overlay");
 
             this._boardCtx = boardCanvas.getContext("2d");
             this._overlayCtx = overlayCanvas.getContext("2d");
@@ -49,22 +60,28 @@ const Main = (function() {
 
         randomRun(count)
         {
+            const ATTEMPT_LIMIT = 10000;
+            outter_loop:
             for (let i = 0; i < count; ++i)
             {
                 let c = null;
 
-                while (true)
+                for (let attempNumber = 0; attempNumber < ATTEMPT_LIMIT; ++attempNumber)
                 {
                     const x = Math.floor(Math.random() * this._engine.boardWidth);
                     const y = Math.floor(Math.random() * this._engine.boardHeight)
                     c = new Game.Coordinate(x, y);
                     if (this._engine.at(c).isUnoccupied())
                     {
-                        break;
+                        this._engine.playAt(new Game.Coordinate(x, y));
+                        continue outter_loop;
                     }
                 }
-
-                this._engine.playAt(new Game.Coordinate(x, y));
+                console.log
+                (
+                    "Can't find free spot after " + ATTEMPT_LIMIT + " attempts. Only " + i + " dots were placed"
+                );
+                break;
             }
         }
     }
@@ -76,13 +93,10 @@ const Main = (function() {
 
     function main()
     {
-        const boardCanvas = element("board");
-        const overlayCanvas = element("overlay");
-        const ctx2 = overlayCanvas.getContext('2d');
         const workspace = element("workspace");
         workspace.style.height = "630px";
 
-        const app = new App(boardCanvas, overlayCanvas, 39, 32);
+        const app = new App(workspace, 39, 32);
         document.app = app;
 
         const resizeButton = element("resize");

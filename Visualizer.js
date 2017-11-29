@@ -117,8 +117,11 @@ const Visualizer = (function() {
 
         capture(player, pointChain)
         {
-            console.log("Visualizer: capture!", player, pointChain);
+            this._state.act((self) => self._capture(player, pointChain), this);
+        }
 
+        _capture(player, pointChain)
+        {
             const canvasPointChain = new Array(pointChain.length);
             for (let i = 0; i < canvasPointChain.length; i++)
             {

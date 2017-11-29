@@ -254,6 +254,12 @@ const Game = (function() {
             const mask = new Mask(this._board.size1, this._board.size2);
 
             const ownColorPredicate = (p) => this._board.at(p).owner === player; 
+
+            if (ownColorPredicate(point))
+            {
+                return false;
+            }
+
             flood(point, mask, ownColorPredicate);
 
             if (!this._doMaskCaptures(mask, player))
