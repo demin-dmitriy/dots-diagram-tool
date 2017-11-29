@@ -1,27 +1,27 @@
-let PLAYDOTS_THEME = (function() {
+const PLAYDOTS_THEME = (function() {
 
     "use strict";
 
-    let D = Drawing;
+    const D = Drawing;
 
-    let blueColor = '#2358ED';
-    let redColor = '#D32020';
-    let dimColor = 'rgba(0, 0, 0, 0.15)'
+    const blueColor = '#2358ED';
+    const redColor = '#D32020';
+    const dimColor = 'rgba(0, 0, 0, 0.15)'
 
     // TODO: rework this
-    let dotStyles =
+    const dotStyles =
     {
         0: [D.fillStyle(blueColor), D.strokeStyle(blueColor)],
         1: [D.fillStyle(redColor), D.strokeStyle(redColor)]
     };
 
-    let captureStyles =
+    const captureStyles =
     {
         0: [D.fillStyle('rgba(35, 88, 237, 0.3)'), D.strokeStyle(blueColor)],
         1: [D.fillStyle('rgba(211, 32, 32, 0.3)'), D.strokeStyle(redColor)]
     };
 
-    let theme = (boardCtx, selectorCtx) =>
+    const theme = (boardCtx, selectorCtx) =>
     ({
         gridLine: (p1, p2) => D.line(p1, p2, D.lineWidth(0), D.strokeStyle('#E1E6EB'))(boardCtx),
         gridStep: 19,

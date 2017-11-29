@@ -1,30 +1,37 @@
-let Game = (function() {
+const Game = (function() {
     
     "use strict";
 
+    const wall = 1;
+    const space = 1;
 
-    let wall = 1;
-    let space = 1;
-
-
-    function Nobody() { }                 /* local */
-    function Player(id) { this.id = id; } /* local */
-
-    let PlayerEnum = {
-        NOBODY: new Nobody(),
-        BLUE: new Player(0),
-        RED: new Player(1)
-    };
-
-    Player.prototype.next = function()
+    class Player
     {
-        if (this === PlayerEnum.BLUE)
-            return PlayerEnum.RED;
-        if (this === PlayerEnum.RED)
-            return PlayerEnum.BLUE;
-        assert(false);
+        constructor(id)
+        {
+            this._id = id;
+            this._next = null; // set by PlayerEnum
+        }
+
+        get id()
+        {
+            return this._id;
+        }
+
+        next()
+        {
+            return this._next;
+        }
+    }
+
+    const PlayerEnum = {
+        NOBODY: new Player(null),
+        BLUE: new Player(0),
+        RED: new Player(1),
     };
 
+    PlayerEnum.BLUE._next = PlayerEnum.RED;
+    PlayerEnum.RED._next = PlayerEnum.BLUE;
 
     class Coordinate extends Lib.Point
     {
@@ -127,13 +134,13 @@ let Game = (function() {
 
         at(anyCoordinate)
         {
-            let internalCoord = this._convertCoordinate(anyCoordinate);
+            const internalCoord = this._convertCoordinate(anyCoordinate);
             return super.at(internalCoord.x, internalCoord.y);
         }
 
         set(anyCoordinate, value)
         {
-            let internalCoord = this._convertCoordinate(anyCoordinate);
+            const internalCoord = this._convertCoordinate(anyCoordinate);
             return super.set(this, internalCoord.x, internalCoord.y, value);
         }
 
@@ -199,10 +206,10 @@ let Game = (function() {
             this.at(coordinate).putStone(player);
             this._notify("playAt", [player, coordinate]);
 
-            let offset = new InternalCoord(1, 0);
+            const offset = new InternalCoord(1, 0);
             let captured = false;
             // TODO: Bad name. clashes with coordinate
-            let coord = InternalCoord.fromCoordinate(coordinate);
+            const coord = InternalCoord.fromCoordinate(coordinate);
 
             for (let i = 0; i != 4; i++)
             {
@@ -244,9 +251,9 @@ let Game = (function() {
             assert(point instanceof InternalCoord);
 
             // 1. Check if a `point` is surrounded by `player` and classify all points as BOUNDARY/INTERIOR/EXTERIOR
-            let mask = new Mask(this._board.size1, this._board.size2);
+            const mask = new Mask(this._board.size1, this._board.size2);
 
-            let ownColorPredicate = (p) => this._board.at(p).owner === player; 
+            const ownColorPredicate = (p) => this._board.at(p).owner === player; 
             flood(point, mask, ownColorPredicate);
 
             if (!this._doMaskCaptures(mask, player))
@@ -255,20 +262,20 @@ let Game = (function() {
             }
 
             // 2. Run bug to find capturing contour
-            let bugStartPoint = leftTopMaskBoundary(mask);
+            const bugStartPoint = leftTopMaskBoundary(mask);
             bugStartPoint.x += 1;
 
             // Must be true, because we chose left-most, top-most boundary point
             assert(mask.at(bugStartPoint.x, bugStartPoint.y) === TopologicalKind.INTERIOR);
-            let startDirection = new InternalCoord(-1, 0); // Face bug towards the boundary point
-            let boundaryPredicate = (p) => mask.at(p.x, p.y) === TopologicalKind.BOUNDARY;
-            let contour = normalizeContour(runBug(bugStartPoint, startDirection, boundaryPredicate));
+            const startDirection = new InternalCoord(-1, 0); // Face bug towards the boundary point
+            const boundaryPredicate = (p) => mask.at(p.x, p.y) === TopologicalKind.BOUNDARY;
+            const contour = normalizeContour(runBug(bugStartPoint, startDirection, boundaryPredicate));
 
             // 3. Find all interior points of capture
-            let territoryMask = new Mask(mask.size1, mask.size2);
+            const territoryMask = new Mask(mask.size1, mask.size2);
             for (let i = 0; i < contour.length; i++)
             {
-                let contourPoint = contour[i];
+                const contourPoint = contour[i];
                 territoryMask.set(contourPoint.x, contourPoint.y, TopologicalKind.BOUNDARY);
             }
             flood(point, territoryMask, (p) => false); // Walls are already encoded in territoryMask
@@ -296,8 +303,8 @@ let Game = (function() {
             {
                 for (let y = wall + space; y < mask.size2; y++)
                 {
-                    let coordinate = new InternalCoord(x, y);
-                    let point = this._board.at(coordinate);
+                    const coordinate = new InternalCoord(x, y);
+                    const point = this._board.at(coordinate);
                     if (mask.at(x, y) === TopologicalKind.INTERIOR
                         && point.owner !== PlayerEnum.NOBODY
                         && point.owner !== player)
@@ -311,10 +318,10 @@ let Game = (function() {
 
         _captureByMask(mask, player)
         {
-            let xMin = wall + space;
-            let xMax = mask.size1 - (wall + space);
-            let yMin = wall + space;
-            let yMax = mask.size2 - (wall + space);
+            const xMin = wall + space;
+            const xMax = mask.size1 - (wall + space);
+            const yMin = wall + space;
+            const yMax = mask.size2 - (wall + space);
 
             for (let x = xMin; x < xMax; x++)
             {
@@ -339,9 +346,9 @@ let Game = (function() {
             {
                 for (let y = 0; y < this._board.height; y++)
                 {
-                    let point = this._board.at(new Coordinate(x, y));
-                    let owner = point.owner;
-                    let stone = point.stone;
+                    const point = this._board.at(new Coordinate(x, y));
+                    const owner = point.owner;
+                    const stone = point.stone;
 
                     if (owner !== PlayerEnum.NOBODY && stone !== PlayerEnum.NOBODY && owner !== stone)
                     {
@@ -354,7 +361,7 @@ let Game = (function() {
     }
 
     // ... Move up?
-    let TopologicalKind = {
+    const TopologicalKind = {
         EXTERIOR: 1,
         BOUNDARY: 2,
         INTERIOR: 3
@@ -363,7 +370,7 @@ let Game = (function() {
     function fromInternalCoordArray(arrayInternalCoord)
     {
         assert(arrayInternalCoord instanceof Array);
-        let coordinateArray = Array(arrayInternalCoord.length);
+        const coordinateArray = Array(arrayInternalCoord.length);
         for (let i = 0; i < coordinateArray.length; i++)
         {
             coordinateArray[i] = arrayInternalCoord[i].toCoordinate();
@@ -417,16 +424,16 @@ let Game = (function() {
         assert(0 < startPoint.y && startPoint.y < mask.size2 - 1);
         mask.set(startPoint.x, startPoint.y, TopologicalKind.INTERIOR);
  
-        let toProcess = [ startPoint ];
+        const toProcess = [ startPoint ];
 
         while (toProcess.length > 0)
         {
-            let point = toProcess.pop();
-            let offset = new InternalCoord(1, 0);
+            const point = toProcess.pop();
+            const offset = new InternalCoord(1, 0);
 
             for (let i = 0; i < 4; i++)
             {
-                let neighbour = point.plus(offset);
+                const neighbour = point.plus(offset);
                 if (mask.at(neighbour.x, neighbour.y) === TopologicalKind.EXTERIOR)
                 {
                     if (wallFunction(neighbour))
@@ -454,11 +461,11 @@ let Game = (function() {
         let point = startPoint.clone();
         let direction = startDirection.clone();
 
-        let contour = [];
+        const contour = [];
 
         do
         {
-            let pointInFront = point.plus(direction);
+            const pointInFront = point.plus(direction);
             if (wallFunction(pointInFront))
             {
                 contour.push(pointInFront);
@@ -477,19 +484,19 @@ let Game = (function() {
     function normalizeContour(contour)
     {
         // I don't remember now, but it's probably important that first point in contour will remain after normalization
-        let normalizedContour = [];
-        let contourPoints = new Set();
+        const normalizedContour = [];
+        const contourPoints = new Set();
 
-        let key = (point) => point.x + ";" + point.y;
+        const key = (point) => point.x + ";" + point.y;
 
         for (let i = 0; i < contour.length; i++)
         {
-            let point = contour[i];
-            let pointKey = key(point);
+            const point = contour[i];
+            const pointKey = key(point);
 
             while (contourPoints.has(pointKey))
             {
-                let redundantPoint = normalizedContour.pop();
+                const redundantPoint = normalizedContour.pop();
                 assert(contourPoints.has(key(redundantPoint)));
                 contourPoints.delete(key(redundantPoint));
             }

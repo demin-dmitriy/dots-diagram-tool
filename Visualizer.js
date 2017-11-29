@@ -1,9 +1,9 @@
-let Visualizer = (function() {
+const Visualizer = (function() {
 
     "use strict";    
 
 
-    let Point = Lib.Point;
+    const Point = Lib.Point;
 
 
     /* local */
@@ -82,18 +82,18 @@ let Visualizer = (function() {
 
         _resetAndShowGrid()
         {
-            let theme = this._theme;
+            const theme = this._theme;
 
             theme.setupCanvas(this._fieldRight + theme.paddingRight, this._fieldBottom + theme.paddingBottom);
             for (let boardX = 0; boardX < this._engine.boardWidth; boardX++)
             {
-                let x = this._boardXCordToCanvasXCord(boardX);
+                const x = this._boardXCordToCanvasXCord(boardX);
                 theme.gridLine(new Point(x, this._fieldTop), new Point(x, this._fieldBottom));
             }
 
             for (let boardY = 0; boardY < this._engine.boardHeight; boardY++)
             {
-                let y = this._boardYCordToCanvasYCord(boardY);
+                const y = this._boardYCordToCanvasYCord(boardY);
                 theme.gridLine(new Point(this._fieldLeft, y), new Point(this._fieldRight, y));
             }
         }
@@ -105,10 +105,10 @@ let Visualizer = (function() {
 
         _playAt(player, coordinate)
         {
-            let engine = this._engine;
-            let theme = this._theme;
-            let x = coordinate.x;
-            let y = coordinate.y;
+            const engine = this._engine;
+            const theme = this._theme;
+            const x = coordinate.x;
+            const y = coordinate.y;
             assert(0 <= x && x < engine.boardWidth);
             assert(0 <= y && y < engine.boardHeight);
 
@@ -119,7 +119,7 @@ let Visualizer = (function() {
         {
             console.log("Visualizer: capture!", player, pointChain);
 
-            let canvasPointChain = new Array(pointChain.length);
+            const canvasPointChain = new Array(pointChain.length);
             for (let i = 0; i < canvasPointChain.length; i++)
             {
                 canvasPointChain[i] = this._boardPointToCanvasPoint(pointChain[i]);
@@ -138,15 +138,15 @@ let Visualizer = (function() {
         onMouseClick(canvasPoint)
         {
             assert(canvasPoint instanceof Lib.Point);
-            let theme = this._theme;
-            let engine = this._engine;
-            let gridStep = theme.gridStep
+            const theme = this._theme;
+            const engine = this._engine;
+            const gridStep = theme.gridStep
 
-            let boardX = Math.floor((canvasPoint.x - this._fieldLeft + gridStep / 2) / gridStep);
-            let boardY = Math.floor((canvasPoint.y - this._fieldTop + gridStep / 2) / gridStep);
+            const boardX = Math.floor((canvasPoint.x - this._fieldLeft + gridStep / 2) / gridStep);
+            const boardY = Math.floor((canvasPoint.y - this._fieldTop + gridStep / 2) / gridStep);
             if (0 <= boardX && boardX < engine.boardWidth && 0 <= boardY && boardY < engine.boardHeight)
             {
-                let coordinate = new Game.Coordinate(boardX, boardY);
+                const coordinate = new Game.Coordinate(boardX, boardY);
                 if (engine.at(coordinate).isUnoccupied())
                 {
                     engine.playAt(coordinate);

@@ -1,4 +1,4 @@
-let Selector = (function(){
+const Selector = (function(){
 
     "using strict";
 
@@ -29,7 +29,7 @@ let Selector = (function(){
             if (this._leftBound <= value && value < this._right)
             {
                 this._left = value;
-                this._notify("updateSelectionRect", [value]);
+                this._notify("updateSelectionRect", []);
             }
         }
 
@@ -43,7 +43,7 @@ let Selector = (function(){
             if (this._left < value && value <= this._rightBound)
             {
                 this._right = value;
-                this._notify("updateSelectionRect", [value]);
+                this._notify("updateSelectionRect", []);
             }
         }
 
@@ -57,7 +57,7 @@ let Selector = (function(){
             if (this._topBound <= value && value < this._bottom)
             {
                 this._top = value;
-                this._notify("updateSelectionRect", [value]);
+                this._notify("updateSelectionRect", []);
             }
         }
 
@@ -71,7 +71,7 @@ let Selector = (function(){
             if (this._top < value && value <= this._bottomBound)
             {
                 this._bottom = value;
-                this._notify("updateSelectionRect", [value]);
+                this._notify("updateSelectionRect", []);
             }
         }
     }
@@ -91,8 +91,8 @@ let Selector = (function(){
 
         updateSelectionRect()
         {
-            let theme = this._theme;
-            let m = this._model;
+            const theme = this._theme;
+            const m = this._model;
 
             // TODO: refactor
             this._theme.selectRect({

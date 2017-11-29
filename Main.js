@@ -1,4 +1,4 @@
-let Main = (function() {
+const Main = (function() {
 
     "use strict";
 
@@ -23,12 +23,12 @@ let Main = (function() {
         resetField(width, height)
         {
             this._engine = new Game.Engine(width, height);
-            let theme = PLAYDOTS_THEME(this._boardCtx, this._overlayCtx);
+            const theme = PLAYDOTS_THEME(this._boardCtx, this._overlayCtx);
             this._visualizer = new Visualizer.Visualizer(theme, this._engine);
             this._selector = new Selector.Model(width, height);
             this._selectorVis = new Selector.Visualizer(theme, this._selector);
 
-            let canvas = this._boardCtx.canvas;
+            const canvas = this._boardCtx.canvas;
             this._notify("resize", [ canvas.width, canvas.height ]);
         }
 
@@ -55,8 +55,8 @@ let Main = (function() {
 
                 while (true)
                 {
-                    let x = Math.floor(Math.random() * this._engine.boardWidth);
-                    let y = Math.floor(Math.random() * this._engine.boardHeight)
+                    const x = Math.floor(Math.random() * this._engine.boardWidth);
+                    const y = Math.floor(Math.random() * this._engine.boardHeight)
                     c = new Game.Coordinate(x, y);
                     if (this._engine.at(c).isUnoccupied())
                     {
@@ -76,25 +76,25 @@ let Main = (function() {
 
     function main()
     {
-        let boardCanvas = element("board");
-        let overlayCanvas = element("overlay");
-        let ctx2 = overlayCanvas.getContext('2d');
-        let workspace = element("workspace");
+        const boardCanvas = element("board");
+        const overlayCanvas = element("overlay");
+        const ctx2 = overlayCanvas.getContext('2d');
+        const workspace = element("workspace");
         workspace.style.height = "630px";
 
-        let app = new App(boardCanvas, overlayCanvas, 39, 32);
+        const app = new App(boardCanvas, overlayCanvas, 39, 32);
         document.app = app;
 
-        let resizeButton = element("resize");
-        let widthField = element("width");
-        let heightField = element("height");
+        const resizeButton = element("resize");
+        const widthField = element("width");
+        const heightField = element("height");
         widthField.value = app.engine().boardWidth;
         heightField.value = app.engine().boardHeight;
 
         resizeButton.addEventListener("click", function(event)
         {
-            let width = Number(widthField.value);
-            let height = Number(heightField.value);
+            const width = Number(widthField.value);
+            const height = Number(heightField.value);
 
             if (Number.isInteger(width) && Number.isInteger(height))
             {

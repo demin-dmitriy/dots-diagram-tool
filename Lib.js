@@ -1,4 +1,4 @@
-let Lib = (function() {
+const Lib = (function() {
 
     "use strict";
 
@@ -27,7 +27,7 @@ let Lib = (function() {
     {
         constructor(size1, size2, valueFunction)
         {
-            let array = new Array(size1 * size2);
+            const array = new Array(size1 * size2);
 
             this._size1 = size1;
             this._size2 = size2;
@@ -88,16 +88,16 @@ let Lib = (function() {
 
         rotateClockwise()
         {
-            let x = this.y;
-            let y = -this.x;
+            const x = this.y;
+            const y = -this.x;
             this.x = x;
             this.y = y;
         }
 
         rotateCounterClockwise()
         {
-            let x = -this.y;
-            let y = this.x;
+            const x = -this.y;
+            const y = this.x;
             this.x = x;
             this.y = y;
         }
@@ -160,4 +160,4 @@ let Lib = (function() {
 
 }());
 
-let assert = Lib.assert;
+const assert = Lib.assert;

@@ -1,4 +1,4 @@
-let Drawing = (function() {
+const Drawing = (function() {
 
     "use strict";
 
@@ -57,8 +57,8 @@ let Drawing = (function() {
             withStyles(ctx, styles, () =>
             {
                 ctx.beginPath();
-                let startAngle = 0;
-                let endAngle = 2 * Math.PI;
+                const startAngle = 0;
+                const endAngle = 2 * Math.PI;
                 ctx.arc(p.x, p.y, r, startAngle, endAngle, false);
                 ctx.fill();
                 ctx.stroke();
@@ -84,7 +84,7 @@ let Drawing = (function() {
      * Styles
      */
 
-    let LineCapEnum = {
+    const LineCapEnum = {
         BUTT: "butt",
         ROUND: "round",
         SQUARE: "square"
@@ -98,7 +98,7 @@ let Drawing = (function() {
         };
     }
 
-    let LineJoinEnum = {
+    const LineJoinEnum = {
         BEVEL: "bevel",
         ROUND: "round",
         MITER: "miter"
@@ -136,7 +136,7 @@ let Drawing = (function() {
         };
     }
 
-    let ColorEnum = {
+    const ColorEnum = {
         BLUE: 'blue',
         RED: 'red',
     };
