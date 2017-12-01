@@ -100,6 +100,7 @@ div#history a {
     margin: 2px;
     text-decoration: none;
     color: #747474;
+    font-weight: normal;
 }
 
 div #history a.red {
@@ -112,4 +113,5 @@ div #history a.blue {
 
 div#history a.selected {
     border-color: rgb(210, 0, 0);
+    font-weight: bold;
 }
