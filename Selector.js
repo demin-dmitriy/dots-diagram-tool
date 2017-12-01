@@ -1,6 +1,6 @@
 const Selector = (function(){
 
-    "using strict";
+    "use strict";
 
     class Model extends Lib.Subscribable
     {
