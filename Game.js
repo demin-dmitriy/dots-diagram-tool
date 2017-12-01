@@ -104,27 +104,46 @@ const Game = (function() {
         }
     }
 
-    class Board extends Lib.Array2D
+    class BoardSize
     {
         constructor(width, height)
         {
             assert(Number.isInteger(width) && Number.isInteger(height));
-            super
-            (
-                wall + space + width + space + wall,
-                wall + space + height + space + wall,
-                (i, j) => new Point()
-            );
             this._width = width;
             this._height = height;
+        }
+
+        get width()
+        {
+            return this._width;
+        }
+
+        get height()
+        {
+            return this._height;
+        }
+    }
+
+    class Board extends Lib.Array2D
+    {
+        constructor(size)
+        {
+            assert(size instanceof BoardSize);
+            super
+            (
+                wall + space + size.width + space + wall,
+                wall + space + size.height + space + wall,
+                (i, j) => new Point()
+            );
+            this._size = size;
         }
 
         _convertCoordinate(anyCoordinate)
         {
             if (anyCoordinate instanceof Coordinate)
             {
-                assert(0 <= anyCoordinate.x && anyCoordinate.x < this._width);
-                assert(0 <= anyCoordinate.y && anyCoordinate.y < this._height);
+                assert(0 <= anyCoordinate.x && anyCoordinate.x < this._size.width);
+                assert(0 <= anyCoordinate.y && anyCoordinate.y < this._size.height);
                 return InternalCoord.fromCoordinate(anyCoordinate);
             }
             assert(anyCoordinate instanceof InternalCoord,
@@ -146,21 +165,21 @@ const Game = (function() {
 
         get width()
         {
-            return this._width;
+            return this._size.width;
         }
 
         get height()
         {
-            return this._height;
+            return this._size.height;
         }
     }
 
     class Engine extends Lib.Subscribable
     {
-        constructor(width, height)
+        constructor(boardSize)
         {
             super();
-            this._board = new Board(width, height);
+            this._board = new Board(boardSize);
             this._nextPlayer = PlayerEnum.BLUE;
 
             this._playerIdToScore = {};
@@ -191,6 +210,14 @@ const Game = (function() {
         at(coordinate)
         {
             return this._board.at(coordinate);
+        }
+
+        playIfLegalAt(coordinate)
+        {
+            if (this.at(coordinate).isUnoccupied(coordinate))
+            {
+                this.playAt(coordinate);
+            }
         }
 
         playAt(coordinate)
@@ -233,6 +260,7 @@ const Game = (function() {
                 }
             }
 
+            this._notify("historyCheckpoint", []);
         }
 
         currentPlayer()
@@ -517,6 +545,8 @@ const Game = (function() {
         PlayerEnum: PlayerEnum,
         Coordinate: Coordinate,
         Point: Point,
+        BoardSize: BoardSize,
+        Board: Board,
         Engine: Engine,
     };
 

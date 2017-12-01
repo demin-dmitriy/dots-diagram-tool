@@ -64,6 +64,8 @@ const Lib = (function() {
             return this._size2;
         }
 
+        // TODO: accept Point as argument
+
         at(i, j)
         {
             this.assertInBounds(i, j);
@@ -145,7 +147,11 @@ const Lib = (function() {
         {
             for (let i = 0; i < this._subscribers.length; i++)
             {
-                this._subscribers[i][name](...args);
+                const subscriber = this._subscribers[i];
+                if (name in subscriber)
+                {
+                    subscriber[name](...args);
+                }
             }
         }
     }

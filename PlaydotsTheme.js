@@ -6,9 +6,9 @@ const PLAYDOTS_THEME = (function() {
 
     const blueColor = '#2358ED';
     const redColor = '#D32020';
+    const redColor2 = 'hsl(224, 100%, 96%)';
     const dimColor = 'rgba(0, 0, 0, 0.15)'
 
-    // TODO: rework this
     const dotStyles =
     {
         0: [D.fillStyle(blueColor), D.strokeStyle(blueColor)],
@@ -21,53 +21,160 @@ const PLAYDOTS_THEME = (function() {
         1: [D.fillStyle('rgba(211, 32, 32, 0.3)'), D.strokeStyle(redColor)]
     };
 
-    const theme = (boardCtx, selectorCtx) =>
-    ({
-        gridLine: (p1, p2) => D.line(p1, p2, D.lineWidth(0), D.strokeStyle('#E1E6EB'))(boardCtx),
-        gridStep: 19,
-        paddingLeft: 20.5,
-        paddingTop: 20.5,
-        paddingRight: 20.5,
-        paddingBottom: 20.5,
+    function createCanvas(node, name)
+    {
+        const canvas = document.createElement("canvas");
+        canvas.setAttribute("id", name);
+        node.appendChild(canvas);
+        return canvas;
+    }
 
-        dot: (player, p) => D.circle(p, 5, ...dotStyles[player.id])(boardCtx),
-
-        setupCanvas: (width, height) =>
+    class BoardComponent extends Lib.Subscribable
+    {
+        constructor(canvas)
         {
-            // TODO: we maybe need to fill canvas
-            boardCtx.canvas.width = width;
-            boardCtx.canvas.height = height;
-            selectorCtx.canvas.width = width;
-            selectorCtx.canvas.height = height;
-        },
+            super();
 
-        capturePolygon: (player, points) =>
-        {
-            assert(points.length > 0);
-            D.withStyles(boardCtx, captureStyles[player.id], () =>
+            this._canvas = canvas;
+            this._context = canvas.getContext('2d');
+
+            this.gridStep = 19;
+            this.paddingLeft = 20.5;
+            this.paddingTop = 20.5;
+            this.paddingRight = 20.5;
+            this.paddingBottom = 20.5;
+
+            canvas.addEventListener("click", (event) =>
             {
-                boardCtx.beginPath();
-                boardCtx.moveTo(points[0].x, points[0].y);
-                for (let i = 1; i < points.length; i++)
-                {
-                    boardCtx.lineTo(points[i].x, points[i].y);
-                }
-                boardCtx.closePath();
-                boardCtx.stroke();
-                boardCtx.fill();
+                const point = new Lib.Point(event.offsetX, event.offsetY);
+                this._notify("onMouseClick", [point]);
             });
-        },
-
-        selectRect: (rect) =>
-        {
-            selectorCtx.fillStyle = dimColor;
-            selectorCtx.clearRect(0, 0, selectorCtx.canvas.width, selectorCtx.canvas.height);
-            selectorCtx.fillRect(0, 0, selectorCtx.canvas.width, selectorCtx.canvas.height);
-            selectorCtx.clearRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
         }
 
-        // setScore
-    });
+        resetCanvas(width, height)
+        {
+            // TODO: maybe need to fill the canvas
+            this._canvas.width = width;
+            this._canvas.height = height;
+        }
 
-    return theme;
+        gridLine(p1, p2)
+        {
+            const ctx = this._context;
+            D.line(p1, p2, D.lineWidth(0), D.strokeStyle('#E1E6EB'))(ctx);
+        }
+
+        dot(player, p)
+        {
+            const ctx = this._context;
+            D.circle(p, 5, ...dotStyles[player.id])(ctx)
+        }
+
+        capturePolygon(player, points)
+        {
+            assert(points.length > 0);
+
+            const ctx = this._context;
+
+            D.withStyles(ctx, captureStyles[player.id], () =>
+            {
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++)
+                {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            });
+        }
+    }
+
+    class SelectorComponent
+    {
+        constructor(canvas)
+        {
+            this._canvas = canvas;
+            this._context = canvas.getContext('2d');
+        }
+
+        resetCanvas(width, height)
+        {
+            this._canvas.width = width;
+            this._canvas.height = height;
+        }
+
+        selectRect(rect)
+        {
+            const ctx = this._context;
+            const canvas = this._canvas;
+
+            ctx.fillStyle = dimColor;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+        }
+    }
+
+    class HistoryComponent
+    {
+        constructor(domContainer)
+        {
+            this._domContatiner = domContainer;
+        }
+
+        appendNode(name, cssClass, onclick)
+        {
+            const button = document.createElement("a");
+            button.innerHTML = name;
+            button.setAttribute("href", "#");
+
+            button.setAttribute("class", cssClass);
+            button.onclick = () => {
+                onclick();
+                return false;
+            };
+            this._domContatiner.appendChild(button);
+        }
+    }
+
+    class PlaydotsTheme
+    {
+        constructor(elements)
+        {
+            const workspace = elements.workspace;
+            const history = elements.history;
+
+            const boardCanvas = createCanvas(workspace, "board");
+            const selectorCanvas = createCanvas(workspace, "overlay");
+
+            this._boardComponent = new BoardComponent(boardCanvas);
+            this._selectorComponent = new SelectorComponent(selectorCanvas);
+            this._historyComponent = new HistoryComponent(history);
+        }
+
+        resetCanvas(width, height)
+        {
+            this._boardComponent.resetCanvas(width, height);
+            this._selectorComponent.resetCanvas(width, height);
+        }
+
+        get board()
+        {
+            return this._boardComponent;
+        }
+
+        get selector()
+        {
+            return this._selectorComponent;
+        }
+
+        get history()
+        {
+            return this._historyComponent;
+        }
+    }
+
+    return PlaydotsTheme;
 }());

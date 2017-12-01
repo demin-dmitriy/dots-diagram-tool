@@ -82,19 +82,30 @@ input {
     border-bottom-width: 1px;*/
 }
 
-div.history {
+div#history {
     margin-top: 5px;
     overflow: auto;
 }
 
-div.history div {
+div#history a {
     float: left;
     width: 20px;
     height: 20px;
+    line-height: 20px;
     border-radius: 2px;
     border-style: solid;
     border-color: #747474;
     border-width: 1px;
     text-align: center;
-    margin-right: 1px;
+    margin: 2px;
+    text-decoration: none;
+    color: #747474;
+}
+
+div #history a.red {
+    background-color: hsl(0, 100%, 89%)
+}
+
+div #history a.blue {
+    background-color: hsl(224, 100%, 89%);
 }

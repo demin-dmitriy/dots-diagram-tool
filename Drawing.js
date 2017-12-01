@@ -2,6 +2,7 @@ const Drawing = (function() {
 
     "use strict";
 
+    // TODO: это лучше реализовать если сделать класс обёртку.
 
     /*
      * Combinators

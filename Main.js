@@ -2,45 +2,45 @@ const Main = (function() {
 
     "use strict";
 
-    function createCanvas(node, name)
+    function element(id)
     {
-        const canvas = document.createElement("canvas");
-        canvas.setAttribute("id", name);
-        node.appendChild(canvas);
-        return canvas;
+        return document.getElementById(id);
     }
 
-    class App extends Lib.Subscribable
+    class App
     {
-        constructor(workspace, initWidth, initHeight)
+        constructor(theme, initWidth, initHeight)
         {
-            super();
-
-            const boardCanvas = createCanvas(workspace, "board");
-            const overlayCanvas = createCanvas(workspace, "overlay");
-
-            this._boardCtx = boardCanvas.getContext("2d");
-            this._overlayCtx = overlayCanvas.getContext("2d");
-
-            this.resetField(initWidth, initHeight)
-
-            // TODO: not a good design
-            overlayCanvas.addEventListener("click", (event) =>
-            {
-                this._visualizer.onMouseClick(new Lib.Point(event.offsetX, event.offsetY));
-            });
+            const size = new Game.BoardSize(initWidth, initHeight);
+            this.resetField(size);
         }
 
-        resetField(width, height)
+        resetField(size)
         {
-            this._engine = new Game.Engine(width, height);
-            const theme = PLAYDOTS_THEME(this._boardCtx, this._overlayCtx);
-            this._visualizer = new Visualizer.Visualizer(theme, this._engine);
-            this._selector = new Selector.Model(width, height);
-            this._selectorVis = new Selector.Visualizer(theme, this._selector);
+            const elements = {
+                workspace: element("workspace"),
+                history: element("history")
+            };
 
-            const canvas = this._boardCtx.canvas;
-            this._notify("resize", [ canvas.width, canvas.height ]);
+            this._engine = new Game.Engine(size);
+            this._selector = new Selector.Model(size);
+
+            const theme = new Themes.Playdots(elements);
+            this._theme = theme;
+
+            this._visualizer = new Visualizer.Visualizer(theme.board, size);
+            this._selectorVis = new Selector.Visualizer(theme.selector, this._selector);
+            this._history = new History.History(theme.history, this._visualizer);
+
+            this._visualizer.subscribe(this._engine);
+            this._engine.subscribe(this._visualizer);
+            this._engine.subscribe(this._history);
+            this._theme.board.subscribe(this._visualizer);
+        }
+
+        get theme()
+        {
+            return this._theme;
         }
 
         get engine()
@@ -56,6 +56,11 @@ const Main = (function() {
         get selector()
         {
             return this._selector;
+        }
+
+        get history()
+        {
+            return this._history;
         }
 
         randomRun(count)
@@ -86,11 +91,6 @@ const Main = (function() {
         }
     }
 
-    function element(id)
-    {
-        return document.getElementById(id);
-    }
-
     function main()
     {
         const workspace = element("workspace");
@@ -102,9 +102,11 @@ const Main = (function() {
         const resizeButton = element("resize");
         const widthField = element("width");
         const heightField = element("height");
+
         widthField.value = app.engine.boardWidth;
         heightField.value = app.engine.boardHeight;
 
+        // TODO: is it good place for event listeners?
         resizeButton.addEventListener("click", function(event)
         {
             const width = Number(widthField.value);
@@ -113,6 +115,7 @@ const Main = (function() {
             if (Number.isInteger(width) && Number.isInteger(height))
             {
                 app.resetField(width, height);
+                workspace.style.height = height + "px";
             }
             else
             {
@@ -152,13 +155,6 @@ const Main = (function() {
         {
             app.selector.bottom += 1;
         });
-
-        app.subscribe({
-            resize: function(width, height)
-            {
-                workspace.style.height = height + "px";
-            }
-        })
     }
 
     return {

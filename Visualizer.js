@@ -2,9 +2,7 @@ const Visualizer = (function() {
 
     "use strict";    
 
-
     const Point = Lib.Point;
-
 
     /* local */
     class State
@@ -37,23 +35,29 @@ const Visualizer = (function() {
         }
     }
 
-
-    // TODO: хороший ли интерфейс?
-    class Visualizer
+    class Visualizer extends Lib.Subscribable
     {
-        constructor(theme, engine)
+        constructor(theme, boardSize)
         {
+            assert(boardSize instanceof Game.BoardSize);
+
+            super();
+
             this._state = new State();
-            this._engine = engine;
+            this._boardSize = boardSize;
             this._theme = theme;
 
             this._fieldLeft = this._boardXCordToCanvasXCord(0);
             this._fieldTop = this._boardYCordToCanvasYCord(0);
-            this._fieldRight = this._boardXCordToCanvasXCord(engine.boardWidth - 1);
-            this._fieldBottom = this._boardYCordToCanvasYCord(engine.boardHeight - 1);
+            this._fieldRight = this._boardXCordToCanvasXCord(boardSize.width - 1);
+            this._fieldBottom = this._boardYCordToCanvasYCord(boardSize.height - 1);
 
-            engine.subscribe(this);
             this.resetAndShowGrid();
+        }
+
+        _doAction(action)
+        {
+            this._state.act(action, this);
         }
 
         _boardXCordToCanvasXCord(x)
@@ -77,21 +81,25 @@ const Visualizer = (function() {
 
         resetAndShowGrid()
         {
-            this._state.act((self) => self._resetAndShowGrid(), this);
+            this._doAction(self => self._resetAndShowGrid());
         }
 
         _resetAndShowGrid()
         {
             const theme = this._theme;
 
-            theme.setupCanvas(this._fieldRight + theme.paddingRight, this._fieldBottom + theme.paddingBottom);
-            for (let boardX = 0; boardX < this._engine.boardWidth; boardX++)
+            theme.resetCanvas
+            (
+                this._fieldRight + theme.paddingRight,
+                this._fieldBottom + theme.paddingBottom
+            );
+            for (let boardX = 0; boardX < this._boardSize.width; boardX++)
             {
                 const x = this._boardXCordToCanvasXCord(boardX);
                 theme.gridLine(new Point(x, this._fieldTop), new Point(x, this._fieldBottom));
             }
 
-            for (let boardY = 0; boardY < this._engine.boardHeight; boardY++)
+            for (let boardY = 0; boardY < this._boardSize.height; boardY++)
             {
                 const y = this._boardYCordToCanvasYCord(boardY);
                 theme.gridLine(new Point(this._fieldLeft, y), new Point(this._fieldRight, y));
@@ -100,24 +108,24 @@ const Visualizer = (function() {
 
         playAt(player, coordinate)
         {
-            this._state.act((self) => self._playAt(player, coordinate), this);
+            this._doAction(self => self._playAt(player, coordinate));
         }
 
         _playAt(player, coordinate)
         {
-            const engine = this._engine;
+            const size = this._boardSize;
             const theme = this._theme;
             const x = coordinate.x;
             const y = coordinate.y;
-            assert(0 <= x && x < engine.boardWidth);
-            assert(0 <= y && y < engine.boardHeight);
+            assert(0 <= x && x < size.width);
+            assert(0 <= y && y < size.height);
 
             theme.dot(player, this._boardPointToCanvasPoint(new Point(x, y)));
         }
 
         capture(player, pointChain)
         {
-            this._state.act((self) => self._capture(player, pointChain), this);
+            this._doAction(self => self._capture(player, pointChain));
         }
 
         _capture(player, pointChain)
@@ -142,18 +150,15 @@ const Visualizer = (function() {
         {
             assert(canvasPoint instanceof Lib.Point);
             const theme = this._theme;
-            const engine = this._engine;
+            const size = this._boardSize;
             const gridStep = theme.gridStep
 
             const boardX = Math.floor((canvasPoint.x - this._fieldLeft + gridStep / 2) / gridStep);
             const boardY = Math.floor((canvasPoint.y - this._fieldTop + gridStep / 2) / gridStep);
-            if (0 <= boardX && boardX < engine.boardWidth && 0 <= boardY && boardY < engine.boardHeight)
+            if (0 <= boardX && boardX < size.width && 0 <= boardY && boardY < size.height)
             {
                 const coordinate = new Game.Coordinate(boardX, boardY);
-                if (engine.at(coordinate).isUnoccupied())
-                {
-                    engine.playAt(coordinate);
-                }
+                this._notify("playIfLegalAt", [coordinate]);
             }
         }
 

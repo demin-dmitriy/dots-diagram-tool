@@ -4,14 +4,16 @@ const Selector = (function(){
 
     class Model extends Lib.Subscribable
     {
-        constructor(width, height)
+        constructor(size)
         {
+            assert(size instanceof Game.BoardSize);
+
             super();
 
             this._leftBound = -0.5;
-            this._rightBound = width - 0.5;
+            this._rightBound = size.width - 0.5;
             this._topBound = -0.5;
-            this._bottomBound = height - 0.5;
+            this._bottomBound = size.height - 0.5;
 
             this._left = this._leftBound;
             this._right = this._rightBound;
