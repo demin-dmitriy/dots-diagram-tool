@@ -109,3 +109,7 @@ div #history a.red {
 div #history a.blue {
     background-color: hsl(224, 100%, 89%);
 }
+
+div#history a.selected {
+    border-color: rgb(210, 0, 0);
+}

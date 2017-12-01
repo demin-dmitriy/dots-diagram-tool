@@ -117,6 +117,33 @@ const Main = (function() {
         widthField.value = app.engine.boardWidth;
         heightField.value = app.engine.boardHeight;
 
+        document.onkeydown = function(event)
+        {
+            // event = event || window.event;
+
+            const left = 37;
+            const up = 38;
+            const right = 39;
+            const down = 40;
+
+            if (event.keyCode == left)
+            {
+                app.history.timepoint -= 1;
+            }
+            else if (event.keyCode == right)
+            {
+                app.history.timepoint += 1;
+            }
+            else if (event.keyCode == down)
+            {
+                app.history.timepoint = app.history.lastTimepoint;
+            }
+            else if (event.keyCode == up)
+            {
+                app.history.timepoint = 0;
+            }
+        };
+
         // TODO: is it good place for event listeners?
         resizeButton.addEventListener("click", function(event)
         {

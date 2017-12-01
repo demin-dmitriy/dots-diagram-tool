@@ -137,16 +137,32 @@ const PLAYDOTS_THEME = (function() {
         }
     }
 
+    const cssClassSelected = 'selected';
+
     class HistoryComponent
     {
         constructor(domContainer)
         {
             this._domContatiner = domContainer;
+            this._addedNodes = [];
+            this._selectedNode = null;
         }
 
         cleanup()
         {
             this._domContatiner.innerHTML = '';
+        }
+
+        select(index)
+        {
+            assert(0 <= index && index < this._addedNodes.length, "Index out of range");
+
+            if (this._selectedNode !== null)
+            {
+                this._addedNodes[this._selectedNode].classList.remove(cssClassSelected);
+            }
+            this._selectedNode = index;
+            this._addedNodes[index].classList.add(cssClassSelected);
         }
 
         appendNode(name, cssClass, onclick)
@@ -161,6 +177,7 @@ const PLAYDOTS_THEME = (function() {
                 return false;
             };
             this._domContatiner.appendChild(button);
+            this._addedNodes.push(button);
         }
     }
 
