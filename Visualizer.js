@@ -51,8 +51,6 @@ const Visualizer = (function() {
             this._fieldTop = this._boardYCordToCanvasYCord(0);
             this._fieldRight = this._boardXCordToCanvasXCord(boardSize.width - 1);
             this._fieldBottom = this._boardYCordToCanvasYCord(boardSize.height - 1);
-
-            this.resetAndShowGrid();
         }
 
         _doAction(action)
@@ -88,11 +86,12 @@ const Visualizer = (function() {
         {
             const theme = this._theme;
 
-            theme.resetCanvas
-            (
-                this._fieldRight + theme.paddingRight,
-                this._fieldBottom + theme.paddingBottom
-            );
+            const canvasWidth = this._fieldRight + theme.paddingRight;
+            const canvasHeight = this._fieldBottom + theme.paddingBottom;
+            theme.resetCanvas(canvasWidth, canvasHeight);
+
+            this._notify("resizeBoardCanvas", [canvasWidth, canvasHeight]);
+
             for (let boardX = 0; boardX < this._boardSize.width; boardX++)
             {
                 const x = this._boardXCordToCanvasXCord(boardX);

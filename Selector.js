@@ -91,6 +91,12 @@ const Selector = (function(){
             this.updateSelectionRect();
         }
 
+        resizeBoardCanvas(canvasWidth, canvasHeight)
+        {
+            this._theme.resetCanvas(canvasWidth, canvasHeight);
+            this.updateSelectionRect();
+        }
+
         updateSelectionRect()
         {
             const theme = this._theme;

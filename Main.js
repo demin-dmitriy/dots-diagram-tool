@@ -7,12 +7,13 @@ const Main = (function() {
         return document.getElementById(id);
     }
 
-    class App
+    class App extends Lib.Subscribable
     {
-        constructor(theme, initWidth, initHeight)
+        constructor(theme, initSize)
         {
-            const size = new Game.BoardSize(initWidth, initHeight);
-            this.resetField(size);
+            assert(initSize instanceof Game.BoardSize);
+            super();
+            this.resetField(initSize);
         }
 
         resetField(size)
@@ -32,10 +33,14 @@ const Main = (function() {
             this._selectorVis = new Selector.Visualizer(theme.selector, this._selector);
             this._history = new History.History(theme.history, this._visualizer);
 
+            this._visualizer.subscribe(theme);
+            this._visualizer.subscribe(this._selectorVis);
             this._visualizer.subscribe(this._engine);
             this._engine.subscribe(this._visualizer);
             this._engine.subscribe(this._history);
-            this._theme.board.subscribe(this._visualizer);
+            this._theme.selector.subscribe(this._visualizer);
+
+            this._visualizer.resetAndShowGrid();
         }
 
         get theme()
@@ -94,11 +99,11 @@ const Main = (function() {
     function main()
     {
         const workspace = element("workspace");
-        workspace.style.height = "630px";
 
-        const app = new App(workspace, 39, 32);
+        const app = new App(workspace, new Game.BoardSize(39, 32));
         document.app = app;
 
+        // TODO: всё что ниже должно быть в theme?
         const resizeButton = element("resize");
         const widthField = element("width");
         const heightField = element("height");
@@ -114,8 +119,7 @@ const Main = (function() {
 
             if (Number.isInteger(width) && Number.isInteger(height))
             {
-                app.resetField(width, height);
-                workspace.style.height = height + "px";
+                app.resetField(new Game.BoardSize(width, height));
             }
             else
             {

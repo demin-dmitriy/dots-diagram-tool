@@ -29,6 +29,14 @@ const PLAYDOTS_THEME = (function() {
         return canvas;
     }
 
+    const boardParameters = {
+        gridStep: 19,
+        paddingLeft: 20.5,
+        paddingTop: 20.5,
+        paddingRight: 20.5,
+        paddingBottom: 20.5
+    };
+
     class BoardComponent extends Lib.Subscribable
     {
         constructor(canvas)
@@ -38,11 +46,10 @@ const PLAYDOTS_THEME = (function() {
             this._canvas = canvas;
             this._context = canvas.getContext('2d');
 
-            this.gridStep = 19;
-            this.paddingLeft = 20.5;
-            this.paddingTop = 20.5;
-            this.paddingRight = 20.5;
-            this.paddingBottom = 20.5;
+            for (const parameter in boardParameters)
+            {
+                this[parameter] = boardParameters[parameter];
+            }
 
             canvas.addEventListener("click", (event) =>
             {
@@ -91,12 +98,25 @@ const PLAYDOTS_THEME = (function() {
         }
     }
 
-    class SelectorComponent
+    class SelectorComponent extends Lib.Subscribable
     {
         constructor(canvas)
         {
+            super();
+
             this._canvas = canvas;
             this._context = canvas.getContext('2d');
+
+            for (const parameter in boardParameters)
+            {
+                this[parameter] = boardParameters[parameter];
+            }
+
+            canvas.addEventListener("click", (event) =>
+            {
+                const point = new Lib.Point(event.offsetX, event.offsetY);
+                this._notify("onMouseClick", [point]);
+            });
         }
 
         resetCanvas(width, height)
@@ -146,12 +166,20 @@ const PLAYDOTS_THEME = (function() {
             const workspace = elements.workspace;
             const history = elements.history;
 
+            this._workspaceElement = workspace;
+            this._historyElement = history;
+
             const boardCanvas = createCanvas(workspace, "board");
             const selectorCanvas = createCanvas(workspace, "overlay");
 
             this._boardComponent = new BoardComponent(boardCanvas);
             this._selectorComponent = new SelectorComponent(selectorCanvas);
             this._historyComponent = new HistoryComponent(history);
+        }
+
+        resizeBoardCanvas(canvasWidth, canvasHeight)
+        {
+            this._workspaceElement.style.height = canvasHeight + "px";
         }
 
         resetCanvas(width, height)
