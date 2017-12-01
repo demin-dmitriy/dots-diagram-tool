@@ -144,6 +144,11 @@ const PLAYDOTS_THEME = (function() {
             this._domContatiner = domContainer;
         }
 
+        cleanup()
+        {
+            this._domContatiner.innerHTML = '';
+        }
+
         appendNode(name, cssClass, onclick)
         {
             const button = document.createElement("a");
@@ -175,6 +180,12 @@ const PLAYDOTS_THEME = (function() {
             this._boardComponent = new BoardComponent(boardCanvas);
             this._selectorComponent = new SelectorComponent(selectorCanvas);
             this._historyComponent = new HistoryComponent(history);
+        }
+
+        cleanup()
+        {
+            this._historyComponent.cleanup();
+            this._workspaceElement.innerHTML = '';
         }
 
         resizeBoardCanvas(canvasWidth, canvasHeight)

@@ -23,6 +23,11 @@ const Main = (function() {
                 history: element("history")
             };
 
+            if (this._theme !== undefined)
+            {
+                this._theme.cleanup();
+            }
+
             this._engine = new Game.Engine(size);
             this._selector = new Selector.Model(size);
 

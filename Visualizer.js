@@ -28,7 +28,7 @@ const Visualizer = (function() {
 
         act(action, self)
         {
-            assert(this._actions.length == this._actionCount, "Only linear histories are allowed");
+            assert(this._actions.length == this._actionCount, "Branching history is not supported");
             this._actions.push(action);
             this._actionCount += 1;
             action(self);
