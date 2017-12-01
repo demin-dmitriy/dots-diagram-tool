@@ -45,7 +45,8 @@ const Main = (function() {
             this._engine.subscribe(this._history);
             this._theme.selector.subscribe(this._visualizer);
 
-            this._visualizer.resetAndShowGrid();
+            this._visualizer.init();
+            this._history.init();
         }
 
         get theme()

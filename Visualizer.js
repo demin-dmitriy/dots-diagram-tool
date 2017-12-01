@@ -77,12 +77,12 @@ const Visualizer = (function() {
             );
         }
 
-        resetAndShowGrid()
+        init()
         {
-            this._doAction(self => self._resetAndShowGrid());
+            this._doAction(self => self._init());
         }
 
-        _resetAndShowGrid()
+        _init()
         {
             const theme = this._theme;
 
