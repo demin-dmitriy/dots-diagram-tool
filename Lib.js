@@ -138,6 +138,7 @@ const Lib = (function() {
             this._subscribers = [];
         }
 
+        // TODO: specify explicitly signal names to subscribe
         subscribe(listener)
         {
             this._subscribers.push(listener);
