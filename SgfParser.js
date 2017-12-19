@@ -58,7 +58,10 @@ const SgfParser = (function(){
 
     function parseCoordinate(str)
     {
-        return [ coordinateMap.indexOf(str[0]), coordinateMap.indexOf(str[1])];
+        return new Game.Coordinate(
+            coordinateMap.indexOf(str[0]),
+            coordinateMap.indexOf(str[1])
+        );
     }
 
     const whitespace = regexp(/\s*/m);

@@ -181,12 +181,55 @@ const PLAYDOTS_THEME = (function() {
         }
     }
 
+    class FileLoaderComponent extends Lib.Subscribable
+    {
+        constructor(dropZone)
+        {
+            super();
+
+            this._dropZone = dropZone;
+            this._cancelEvent = (event) =>
+            {
+                event.preventDefault();
+                return false;
+            };
+
+            this._dropEvent = (event) =>
+            {
+                event.preventDefault();
+
+                const files = event.dataTransfer.files;
+
+                for (let i = 0; i != files.length; ++i)
+                {
+                    this._notify("loadFile", [files[i]]);
+                }
+
+                return false;
+            }
+
+            dropZone.addEventListener("dragover", this._cancelEvent);
+            dropZone.addEventListener("dragenter", this._cancelEvent);
+            dropZone.addEventListener("drop", this._dropEvent);
+        }
+
+        cleanup()
+        {
+            dropZone = this._dropZone;
+
+            dropZone.removeEventListener("dragover", this._cancelEvent);
+            dropZone.removeEventListener("dragenter", this._cancelEvent);
+            dropZone.removeEventListener("drop", this._dropEvent);
+        }
+    }
+
     class PlaydotsTheme
     {
         constructor(elements)
         {
             const workspace = elements.workspace;
             const history = elements.history;
+            const dropZone = elements.dropZone;
 
             this._workspaceElement = workspace;
             this._historyElement = history;
@@ -197,12 +240,14 @@ const PLAYDOTS_THEME = (function() {
             this._boardComponent = new BoardComponent(boardCanvas);
             this._selectorComponent = new SelectorComponent(selectorCanvas);
             this._historyComponent = new HistoryComponent(history);
+            this._fileLoaderComponent = new FileLoaderComponent(dropZone);
         }
 
         cleanup()
         {
             this._historyComponent.cleanup();
             this._workspaceElement.innerHTML = '';
+            this._fileLoaderComponent.cleanup();
         }
 
         resizeBoardCanvas(canvasWidth, canvasHeight)
@@ -229,6 +274,11 @@ const PLAYDOTS_THEME = (function() {
         get history()
         {
             return this._historyComponent;
+        }
+
+        get fileLoader()
+        {
+            return this._fileLoaderComponent;
         }
     }
 

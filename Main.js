@@ -20,7 +20,8 @@ const Main = (function() {
         {
             const elements = {
                 workspace: element("workspace"),
-                history: element("history")
+                history: element("history"),
+                dropZone: document
             };
 
             if (this._theme !== undefined)
@@ -44,6 +45,8 @@ const Main = (function() {
             this._engine.subscribe(this._visualizer);
             this._engine.subscribe(this._history);
             this._theme.selector.subscribe(this._visualizer);
+
+            this._theme.fileLoader.subscribe(this);
 
             this._visualizer.init();
             this._history.init();
@@ -72,6 +75,16 @@ const Main = (function() {
         get history()
         {
             return this._history;
+        }
+
+        loadFile(file)
+        {
+            const fileReader = new FileReader();
+            fileReader.readAsText(file);
+            fileReader.onload = (event) =>
+            {
+                console.log(Sgf.parse(event.target.result));
+            }
         }
 
         randomRun(count)
