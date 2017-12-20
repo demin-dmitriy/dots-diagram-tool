@@ -222,11 +222,12 @@ const Game = (function() {
 
         playAt(coordinate)
         {
-            this.playerPlaysAt(coordinate, this._nextPlayer);
+            this.placeDotAt(coordinate, this._nextPlayer);
+            this._notify("historyCheckpoint", []);
             this._nextPlayer = this._nextPlayer.next();
         }
 
-        playerPlaysAt(coordinate, player)
+        placeDotAt(coordinate, player)
         {
             assert(coordinate instanceof Coordinate);
             assert(this.at(coordinate).isUnoccupied(), "Point is already occupied");
@@ -259,8 +260,6 @@ const Game = (function() {
                     }
                 }
             }
-
-            this._notify("historyCheckpoint", []);
         }
 
         currentPlayer()

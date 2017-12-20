@@ -26,7 +26,7 @@ const SgfParser = (function(){
 
         get value()
         {
-            return this_value;
+            return this._value;
         }
     }
 
@@ -34,13 +34,58 @@ const SgfParser = (function(){
     {
         constructor(properties, children)
         {
+            assert(properties instanceof Array);
+            assert(children instanceof Array);
+
             this._properties = properties;
             this._children = children
+
+            const propertiesDict = {};
+
+            for (let i = 0; i < properties.length; ++i)
+            {
+                const property = properties[i];
+
+                if (!(property.name in propertiesDict))
+                {
+                    propertiesDict[property.name] = [];
+                }
+
+                propertiesDict[property.name].push(property.value);
+            }
+
+            this._propertiesDict = propertiesDict;
         }
 
-        get properties()
+        get propertyList()
         {
             return this._properties;
+        }
+
+        getPropertyValues(name)
+        {
+            if (name in this._propertiesDict)
+            {
+                return this._propertiesDict[name]
+            }
+            return [];
+        }
+
+        getPropertyValue(name, defaultValue)
+        {
+            if (defaultValue === undefined)
+            {
+                defaultValue = null;
+            }
+
+            if (name in this._propertiesDict)
+            {
+                const values = this._propertiesDict[name];
+                assert(values.length == 1);
+                return values[0];
+            }
+
+            return defaultValue;
         }
 
         get children()
@@ -192,12 +237,14 @@ const SgfParser = (function(){
                 {
                     let result = subtrees;
 
+                    assert(sequence.length >= 1);
+
                     for (let i = sequence.length - 1; i >= 0; --i)
                     {
-                        result = new Tree(sequence[i], result);
+                        result = [new Tree(sequence[i], result)];
                     }
 
-                    return result;
+                    return result[0];
                 }
             )
             .wrap(word('('), word(')')),

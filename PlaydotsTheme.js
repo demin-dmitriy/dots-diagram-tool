@@ -215,7 +215,7 @@ const PLAYDOTS_THEME = (function() {
 
         cleanup()
         {
-            dropZone = this._dropZone;
+            const dropZone = this._dropZone;
 
             dropZone.removeEventListener("dragover", this._cancelEvent);
             dropZone.removeEventListener("dragenter", this._cancelEvent);

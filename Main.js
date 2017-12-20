@@ -83,7 +83,70 @@ const Main = (function() {
             fileReader.readAsText(file);
             fileReader.onload = (event) =>
             {
-                console.log(Sgf.parse(event.target.result));
+                const result = SgfParser.parse(event.target.result);
+                if (result.length != 1)
+                {
+                    console.log("Warning: sgf file should contain exactly one game");
+                }
+                if (result.length >= 1)
+                {
+                    this.loadGame(result[0]);
+                }
+            }
+        }
+
+        loadGame(game)
+        {
+            assert(game.getPropertyValue("FF") == 4);
+            assert(game.getPropertyValue("GM") == 40);
+
+            const size = game.getPropertyValue("SZ");
+            this.resetField(new Game.BoardSize(size[0], size[1]));
+
+            const placeDots = (arrayOrCoordinate, color) =>
+            {
+                if (arrayOrCoordinate instanceof Array)
+                {
+                    const array = arrayOrCoordinate;
+                    for (let i = 0; i < array.length; i++)
+                    {
+                        this.engine.placeDotAt(array[i], color);
+                    }
+                }
+                else if (arrayOrCoordinate instanceof Game.Coordinate)
+                {
+                    const coordinate = arrayOrCoordinate;
+                    this.engine.placeDotAt(coordinate, color);
+                }
+                else
+                {
+                    assert(arrayOrCoordinate === null);
+                }
+            }
+
+            let currentNode = game;
+
+            while (true)
+            {
+                const addBlue = currentNode.getPropertyValue("AB", []);
+                const addRed = currentNode.getPropertyValue("AW", []);
+                const playBlue = currentNode.getPropertyValue("B");
+                const playRed = currentNode.getPropertyValue("W");
+
+                placeDots(addBlue, Game.PlayerEnum.BLUE);
+                placeDots(addRed, Game.PlayerEnum.RED);
+                placeDots(playBlue, Game.PlayerEnum.BLUE);
+                placeDots(playRed, Game.PlayerEnum.RED);
+
+                this.history.historyCheckpoint();
+                if (currentNode.children.length >= 1)
+                {
+                    currentNode = currentNode.children[0];
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
