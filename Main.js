@@ -1,4 +1,4 @@
-const Main = (function() {
+export let Main = (function() {
 
     "use strict";
 
