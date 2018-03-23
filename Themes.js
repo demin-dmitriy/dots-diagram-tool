@@ -1,8 +1,6 @@
-const Themes = (function() {
-    
-    "use strict";
+// TODO: move to subfolder "themes"
 
-    return {
-        Playdots: PLAYDOTS_THEME
-    }    
-}());
+import { PlaydotsTheme } from '/PlaydotsTheme.js';
+
+
+export const Playdots = PlaydotsTheme;

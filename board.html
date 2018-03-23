@@ -42,28 +42,9 @@
             </div>
         </div>
         
-        
-        <script type="text/javascript" src="lib/gif.worker.js"></script>
-        <script type="text/javascript" src="lib/gif.js"></script>
-        <script type="text/javascript" src="lib/parsimmon.js"></script>
-
-        <script type="text/javascript" src="Lib.js"></script>
-        <script type="text/javascript" src="Drawing.js"></script>
-        <script type="text/javascript" src="PlaydotsTheme.js"></script>
-        <script type="text/javascript" src="Themes.js"></script>
-        <script type="text/javascript" src="Visualizer.js"></script>
-        <script type="text/javascript" src="Game.js"></script>
-        <script type="text/javascript" src="Selector.js"></script>
-        <script type="text/javascript" src="History.js"></script>
-        <script type="text/javascript" src="SgfParser.js"></script>
-        <script type="text/javascript" src="SgfUnparser.js"></script>
-        <script type="text/javascript" src="Sgf.js"></script>
-        <script type="text/javascript" src="Download.js"></script>
-        <script type="module" src="Main.js"></script>
-
         <script type="module">
-            import * as M from '/Main.js';
-            M.Main.main();
+            import { main } from '/Main.js';
+            main();
         </script>
     </body>
 </html>

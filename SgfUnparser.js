@@ -1,67 +1,57 @@
-const SgfUnparser = (function(){
+function intToChar(value)
+{
+    const table = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return table.charAt(value);
+}
 
-    "use strict";
+function prop(name, value)
+{
+    return name + "[" + value + "]";
+}
 
-    function intToChar(value)
-    {
-        const table = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        return table.charAt(value);
-    }
+function move(color, x, y)
+{
+    assert(color == "B" || color == "W");
+    return prop(color, intToChar(x) + intToChar(y));
+}
 
-    function prop(name, value)
-    {
-        return name + "[" + value + "]";
-    }
+function playerToColor(player)
+{
+    return "BW".at(player.id);
+}
 
-    function move(color, x, y)
-    {
-        assert(color == "B" || color == "W");
-        return prop(color, intToChar(x) + intToChar(y));
-    }
+function node(props)
+{
+    return ";" + props;
+}
 
-    function playerToColor(player)
-    {
-        return "BW".at(player.id);
-    }
+function tree(nodes)
+{
+    return "(" + nodes + ")";
+}
 
-    function node(props)
-    {
-        return ";" + props;
-    }
+export function unparse(boardSize, dots)
+{
+    assert(boardSize instanceof Game.BoardSize);
 
-    function tree(nodes)
-    {
-        return "(" + nodes + ")";
-    }
+    const width = boardSize.width;
+    const height = boardSize.height;
 
-    function unparse(boardSize, dots)
-    {
-        assert(boardSize instanceof Game.BoardSize);
+    const game =
+        [ prop('GM', '40')                 // Dots game
+        , prop('FF', '4')                  // SGF version
+        , prop('CA', 'UTF-8')              // Encoding
+        , prop('SZ', width + ':' + height) // Field size
+        , prop('RU', 'russian')            // Russian ruleset
+        , prop('PB', 'Первый игрок')
+        , prop('PW', 'Второй игрок')
+        ].join('');
 
-        const width = boardSize.width;
-        const height = boardSize.height;
+    const moves = dots.map(d =>
+        move(playerToColor(d.player), d.x, d.y)
+    );
 
-        const game =
-            [ prop('GM', '40')                 // Dots game
-            , prop('FF', '4')                  // SGF version
-            , prop('CA', 'UTF-8')              // Encoding
-            , prop('SZ', width + ':' + height) // Field size
-            , prop('RU', 'russian')            // Russian ruleset
-            , prop('PB', 'Первый игрок')
-            , prop('PW', 'Второй игрок')
-            ].join('');
+    const nodes = [game].concat(moves);
 
-        const moves = dots.map(d =>
-            move(playerToColor(d.player), d.x, d.y)
-        );
-
-        const nodes = [game].concat(moves);
-
-        return tree(nodes.map(node).join(""));
-    }
-
-    return {
-        unparse
-    };
-
-}());
+    return tree(nodes.map(node).join(""));
+}

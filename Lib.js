@@ -1,170 +1,154 @@
-const Lib = (function() {
-
-    "use strict";
-
-    function assert(condition, message = "Assertion error")
+export function assert(condition, message = "Assertion error")
+{
+    if (!condition)
     {
-        if (!condition)
-        {
-            throw message;
-        }
+        throw message;
+    }
+}
+
+export function apply(fs, arg)
+{
+    if (fs == undefined)
+    {
+        return;
     }
 
-    function apply(fs, arg)
+    for (let i = 0; i < fs.length; i++)
     {
-        if (fs == undefined)
-        {
-            return;
-        }
-
-        for (let i = 0; i < fs.length; i++)
-        {
-            fs[i](arg);
-        }
+        fs[i](arg);
     }
+}
 
-    class Array2D
+export class Array2D
+{
+    constructor(size1, size2, valueFunction)
     {
-        constructor(size1, size2, valueFunction)
+        const array = new Array(size1 * size2);
+
+        this._size1 = size1;
+        this._size2 = size2;
+
+        for (let i = 0; i < size1; i++)
         {
-            const array = new Array(size1 * size2);
-
-            this._size1 = size1;
-            this._size2 = size2;
-
-            for (let i = 0; i < size1; i++)
+            for (let j = 0; j < size2; j++)
             {
-                for (let j = 0; j < size2; j++)
-                {
-                    array[this._index(i, j)] = valueFunction(i, j);
-                }
+                array[this._index(i, j)] = valueFunction(i, j);
             }
-
-            this._data = array;
         }
 
-        _index(i, j)
-        {
-            return i * this._size2 + j;
-        }
-
-        assertInBounds(i, j)
-        {
-            assert(Number.isInteger(i) && Number.isInteger(j), "Index must be ineger");
-            assert(0 <= i && i < this._size1 && 0 <= j && j < this._size2, "Invalid index");
-        }
-
-        get size1()
-        {
-            return this._size1;
-        }
-
-        get size2()
-        {
-            return this._size2;
-        }
-
-        // TODO: accept Point as argument
-
-        at(i, j)
-        {
-            this.assertInBounds(i, j);
-            return this._data[this._index(i, j)];
-        }
-
-        set(i, j, v)
-        {
-            this.assertInBounds(i, j);
-            this._data[this._index(i, j)] = v;
-        }
+        this._data = array;
     }
 
-
-    class Point
+    _index(i, j)
     {
-        constructor(x, y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        rotateClockwise()
-        {
-            const x = this.y;
-            const y = -this.x;
-            this.x = x;
-            this.y = y;
-        }
-
-        rotateCounterClockwise()
-        {
-            const x = -this.y;
-            const y = this.x;
-            this.x = x;
-            this.y = y;
-        }
-
-        squareLength()
-        {
-            return this.x * this.x + this.y * this.y;
-        }
-
-        clone()
-        {
-            return new this.constructor(this.x, this.y);
-        }
-
-        equals(other)
-        {
-            return this.x === other.x && this.y === other.y;
-        }
-
-        plus(other)
-        {
-            return new this.constructor(this.x + other.x, this.y + other.y);
-        }
-
-        negative()
-        {
-            return new this.constructor(-this.x, -this.y);
-        }
+        return i * this._size2 + j;
     }
 
-
-    class Subscribable
+    assertInBounds(i, j)
     {
-        constructor()
-        {
-            this._subscribers = [];
-        }
+        assert(Number.isInteger(i) && Number.isInteger(j), "Index must be ineger");
+        assert(0 <= i && i < this._size1 && 0 <= j && j < this._size2, "Invalid index");
+    }
 
-        // TODO: specify explicitly signal names to subscribe
-        subscribe(listener)
-        {
-            this._subscribers.push(listener);
-        }
+    get size1()
+    {
+        return this._size1;
+    }
 
-        _notify(name, args)
+    get size2()
+    {
+        return this._size2;
+    }
+
+    // TODO: accept Point as argument
+
+    at(i, j)
+    {
+        this.assertInBounds(i, j);
+        return this._data[this._index(i, j)];
+    }
+
+    set(i, j, v)
+    {
+        this.assertInBounds(i, j);
+        this._data[this._index(i, j)] = v;
+    }
+}
+
+
+export class Point
+{
+    constructor(x, y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    rotateClockwise()
+    {
+        const x = this.y;
+        const y = -this.x;
+        this.x = x;
+        this.y = y;
+    }
+
+    rotateCounterClockwise()
+    {
+        const x = -this.y;
+        const y = this.x;
+        this.x = x;
+        this.y = y;
+    }
+
+    squareLength()
+    {
+        return this.x * this.x + this.y * this.y;
+    }
+
+    clone()
+    {
+        return new this.constructor(this.x, this.y);
+    }
+
+    equals(other)
+    {
+        return this.x === other.x && this.y === other.y;
+    }
+
+    plus(other)
+    {
+        return new this.constructor(this.x + other.x, this.y + other.y);
+    }
+
+    negative()
+    {
+        return new this.constructor(-this.x, -this.y);
+    }
+}
+
+
+export class Subscribable
+{
+    constructor()
+    {
+        this._subscribers = [];
+    }
+
+    // TODO: specify explicitly signal names to subscribe
+    subscribe(listener)
+    {
+        this._subscribers.push(listener);
+    }
+
+    _notify(name, args)
+    {
+        for (let i = 0; i < this._subscribers.length; i++)
         {
-            for (let i = 0; i < this._subscribers.length; i++)
+            const subscriber = this._subscribers[i];
+            if (name in subscriber)
             {
-                const subscriber = this._subscribers[i];
-                if (name in subscriber)
-                {
-                    subscriber[name](...args);
-                }
+                subscriber[name](...args);
             }
         }
     }
-
-    return {
-        assert: assert,
-        apply: apply,
-        Array2D: Array2D,
-        Point: Point,
-        Subscribable: Subscribable,
-    };
-
-}());
-
-const assert = Lib.assert;
+}
