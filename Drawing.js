@@ -1,5 +1,18 @@
 import * as Lib from '/Lib.js';
 
+function apply(fs, arg)
+{
+    if (fs == undefined)
+    {
+        return;
+    }
+
+    for (let i = 0; i < fs.length; i++)
+    {
+        fs[i](arg);
+    }
+}
+
 
 // TODO: это лучше реализовать если сделать класс обёртку.
 
