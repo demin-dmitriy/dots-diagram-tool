@@ -10,7 +10,10 @@ function assertSatisfySpec(name, value, argSpec)
     }
     else
     {
-        
+        assert(
+            hasType(value, argSpec),
+            `"${name}" is expected to be a "${argSpec.name}"`
+        );
     }
 }
 
