@@ -49,6 +49,8 @@ export class Canvas
             canvasElement.width = size.width;
             canvasElement.height = size.height;
         }
+
+        this._updateStyle();
     }
 
     get size()
