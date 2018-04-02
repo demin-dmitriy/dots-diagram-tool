@@ -10,6 +10,8 @@ function assertSatisfySpec(name, value, argSpec)
     }
     else
     {
+        // TODO: support arrays
+        // TODO: support finite numbers and maybe integers
         assert(
             hasType(value, argSpec),
             `"${name}" is expected to be a "${argSpec.name}"`
@@ -34,6 +36,8 @@ export function assertNamedArgs(args, spec)
 }
 
 
+// TODO: when this function will be used everywhere, benchmark it's performance
+//       impact
 export function assertArgs(args, spec)
 {
     assertEq(
