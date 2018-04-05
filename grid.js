@@ -67,8 +67,6 @@ export class Grid
     horizontalLine(j)
     {
         assertArgs(arguments, { j : Number });
-        assert(Number.isInteger(j));
-        assert(0 <= j && j < this._ny);
 
         return this._paddingY + this._cellSize * j;
     }
@@ -76,8 +74,6 @@ export class Grid
     verticalLine(i)
     {
         assertArgs(arguments, { i : Number});
-        assert(Number.isInteger(i));
-        assert(0 <= i && i < this._nx);
 
         return this._paddingX + this._cellSize * i;
     }
