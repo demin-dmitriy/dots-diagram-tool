@@ -30,6 +30,7 @@ export class Canvas
         {
             const layerName = this._layerNames[i];
             const canvasElement = document.createElement('canvas');
+            rootNode.appendChild(canvasElement);
             this._canvasElements.push(canvasElement);
             const context = canvasElement.getContext('2d');
             this._layers[layerName] = new Layer(context);
