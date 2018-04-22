@@ -3,7 +3,7 @@ import { assertNamedArgs } from '/utils/assert_args.js';
 import { Publisher } from '/utils/'
 
 
-export class Board extends Publisher
+export class BoardModel extends Publisher
 {
     constructor(parameters)
     {
