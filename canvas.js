@@ -67,12 +67,12 @@ export class Canvas
 
     addEventListener(...args)
     {
-        return this._lastCanvas().addEventListener(..args);
+        return this._lastCanvas().addEventListener(...args);
     }
 
     removeEventListener(...args)
     {
-        return this._lastCanvas().removeEventListener(..args);
+        return this._lastCanvas().removeEventListener(...args);
     }
 
     _lastCanvas()
