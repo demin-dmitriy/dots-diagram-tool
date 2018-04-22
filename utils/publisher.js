@@ -7,7 +7,7 @@ function signalNameToHandlerName(signal)
 }
 
 
-export class PublisherI
+export class Publisher
 {
     constructor(signals)
     {
