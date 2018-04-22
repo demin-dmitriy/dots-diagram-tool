@@ -2,6 +2,7 @@ import { assertArgs, assertNamedArgs } from '/utils/assert_args.js';
 import { assert } from '/utils/assert.js';
 import { Vector } from '/data/vector.js';
 import { Maybe } from '/data/maybe.js';
+import { BoardModel } from '/model/BoardModel.js';
 
 
 /*
@@ -16,32 +17,26 @@ export class Grid
             paddingX : Number,
             paddingY : Number,
             cellSize : Number,
-            nx : Number,
-            ny : Number
+            boardModel : BoardModel
         });
 
-        assert(parameters.nx > 0);
-        assert(Number.isInteger(parameters.nx));
-        assert(parameters.ny > 0);
-        assert(Number.isInteger(parameters.ny));
 
         assert(parameters.cellSize > 0);
 
         this._paddingX = parameters.paddingX;
         this._paddingY = parameters.paddingY;
         this._cellSize = parameters.cellSize;
-        this._nx = parameters.nx;
-        this._ny = parameters.ny;
+        this._boardModel = parameters.boardModel;
     }
 
     get sizeX()
     {
-        return this._nx;
+        return this._boardModel.sizeX;
     }
 
     get sizeY()
     {
-        return this._ny;
+        return this._boardModel.sizeY;
     }
 
     get left()
@@ -51,7 +46,7 @@ export class Grid
 
     get right()
     {
-        return this.verticalLine(this._nx - 1);
+        return this.verticalLine(this.sizeX - 1);
     }
 
     get top()
@@ -61,7 +56,7 @@ export class Grid
 
     get bottom()
     {
-        return this.horizontalLine(this._ny - 1);
+        return this.horizontalLine(this.sizeY - 1);
     }
 
     horizontalLine(j)
@@ -99,7 +94,7 @@ export class Grid
         const i = Math.floor((realtiveX + cellSize / 2) / cellSize);
         const j = Math.floor((relativeY + cellSize / 2) / cellSize);
 
-        if (0 <= i && i < this._nx && 0 <= j && j < this._ny)
+        if (0 <= i && i < this.sizeX && 0 <= j && j < this.sizeY)
         {
             return Maybe.just(new Vector(i, j));
         }
