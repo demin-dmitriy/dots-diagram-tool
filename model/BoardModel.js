@@ -1,6 +1,7 @@
 import { assert } from '/utils/assert.js';
 import { assertNamedArgs } from '/utils/assert_args.js';
 import { Publisher } from '/utils/'
+import { isNatural } from '/utils/is_natural';
 
 
 export class BoardModel extends Publisher
@@ -8,26 +9,24 @@ export class BoardModel extends Publisher
     constructor(parameters)
     {
         assertNamedArgs(parameters, {
-            width: Number,
-            height: Number
+            sizeX: Number,
+            sizeY: Number
         });
 
-        assert(parameters.width > 0);
-        assert(Number.isInteger(parameters.width));
-        assert(parameters.height > 0);
-        assert(Number.isInteger(parameters.height));
+        assert(isNatural(sizeX));
+        assert(isNatural(sizeY));
 
-        this._width = width;
-        this._height = height;
+        this._sizeX = sizeX;
+        this._sizeY = sizeY;
     }
 
-    get width()
+    get sizeX()
     {
-        return this._width;
+        return this._sizeX;
     }
 
-    get height()
+    get sizeY()
     {
-        return this._height;
+        return this._sizeY;
     }
 }
