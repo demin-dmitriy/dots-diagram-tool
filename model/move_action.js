@@ -17,24 +17,9 @@ class PlaceDotAction
         this._position = position;
     }
 
-    get color()
+    on({ placeDot, surround })
     {
-        return this._color;
-    }
-
-    get x()
-    {
-        return this._position.x;
-    }
-
-    get y()
-    {
-        return this._position.y;
-    }
-
-    position()
-    {
-        return this._position.clone();
+        return placeDot(this._color, this._position);
     }
 }
 
@@ -46,7 +31,7 @@ class SurroundAction
         assertArgs(arguments, {
             color: Color,
             border: Loop,
-            holes: Array /* of Loop */
+            holes: Array /* of Loops */
         });
 
         this._color = color;
@@ -54,19 +39,9 @@ class SurroundAction
         this._holes = holes;
     }
 
-    get color()
+    on({ placeDot, surround })
     {
-        return this._color;
-    }
-
-    get border()
-    {
-        return this._border;
-    }
-
-    get holes()
-    {
-        return this._holes;
+        return surround(this._color, this._border, this._holes);
     }
 }
 
