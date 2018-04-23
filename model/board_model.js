@@ -4,7 +4,7 @@ import { Publisher } from '/utils/'
 import { isNatural } from '/utils/is_natural';
 
 
-export class BoardModel extends Publisher
+export class BoardModel
 {
     constructor(parameters)
     {

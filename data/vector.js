@@ -51,4 +51,9 @@ export class Vector
     {
         return new this.constructor(-this.x, -this.y);
     }
+
+    isInteger()
+    {
+        return Number.isInteger(this.x) && Number.isInteger(this.y);
+    }
 }
