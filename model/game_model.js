@@ -36,8 +36,11 @@ export class GameModel extends Publisher
         return this._actions;
     }
 
+    // TODO: implement as a setter?
     setActions(actions)
     {
+        // TODO: validate actions
+
         assertArgs(arguments, { actions: Array });
         actions.forEach(action => assert(hasType(action, MoveAction)));
 
