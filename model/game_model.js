@@ -1,8 +1,11 @@
-import { Publisher } from '/utils/publisher.js';
 import { assertArgs } from '/utils/assert_args.js';
+import { Publisher } from '/utils/publisher.js';
 import { BoardModel } from '/model/board_model.js';
 import { MoveAction } from '/model/move_action.js';
 import { hasType } from '/utils/has_type.js'
+
+
+const UPDATE_SIGNAL = 'updateGameModel';
 
 
 export class GameModel extends Publisher
@@ -16,9 +19,9 @@ export class GameModel extends Publisher
 
         actions.forEach(action => assert(hasType(action, MoveAction)));
 
-        super([  ]);
+        super([ UPDATE_SIGNAL ]);
         this._boardModel = boardModel;
-        this._actions 
+        this._actions = actions;
     }
 
     get boardModel()
@@ -28,12 +31,26 @@ export class GameModel extends Publisher
 
     get actions()
     {
+        // TODO: is it good to provide direct access like this? (it is not)
+
         return this._actions;
+    }
+
+    setActions(actions)
+    {
+        assertArgs(arguments, { actions: Array });
+        actions.forEach(action => assert(hasType(action, MoveAction)));
+
+        this._actions = actions;
+
+        this.notify(UPDATE_SIGNAL, []);
     }
 
     addAction(action)
     {
         assertArgs(arguments, { action: MoveAction });
         this._actions.push(action);
+
+        this.notify(UPDATE_SIGNAL, []);
     }
 }
