@@ -16,9 +16,9 @@ export class Publisher
 
         for (let i = 0; i < signals.length; i++)
         {
-            this._signalToSubscribers[signal[i]] = new Set();
-            this._signalToHandlerName[signal[i]]
-                    = signalNameToHandlerName(signal[i]);
+            this._signalToSubscribers[signals[i]] = new Set();
+            this._signalToHandlerName[signals[i]]
+                    = signalNameToHandlerName(signals[i]);
         }
     }
 
@@ -27,14 +27,14 @@ export class Publisher
         for (let i = 0; i < signals.length; i++)
         {
             assert(
-                signal[i] in this._signalToSubscribers,
-                "Invalid signal " + signal[i]
+                signals[i] in this._signalToSubscribers,
+                "Invalid signal " + signals[i]
             );
         }
 
         for (let i = 0; i < signals.length; i++)
         {
-            this._signalToSubscribers[signal[i]].add(listener);
+            this._signalToSubscribers[signals[i]].add(listener);
         }
     }
 

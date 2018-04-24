@@ -4,6 +4,7 @@ import { BoardView } from '/view/board_view.js';
 import { Grid } from '/grid.js';
 import { GameModel } from '/model/game_model.js';
 import { Canvas } from '/canvas.js';
+import { BackgroundView } from '/view/background_view.js';
 
 
 // TODO: probably reorganize/rename properties
@@ -11,6 +12,9 @@ export const DEFAULT_STYLE = Object.freeze({
     grid: Object.freeze({
         lineColor: 'rgb(225, 230, 235)',
         lineWidth: 0
+    }),
+    background: Object.freeze({
+        color: 'white'
     }),
     blueColor: 'rgb(35, 88, 237)',
     redColor: 'rgb(211, 32, 32)',
@@ -29,13 +33,18 @@ export const DEFAULT_STYLE = Object.freeze({
 // TODO: not sure that this is a good abstraction
 export class Arrangement
 {
-    constructor(rootNode, boardModel, style=DEFAULT_STYLE)
+    static _assertValidConstructorArgs(rootNode, boardModel, style)
     {
         assertArgs(arguments, {
             rootNode: HTMLElement,
             boardModel: BoardModel,
             style: Object // TODO: specify fields
-        })
+        });
+    }
+
+    constructor(rootNode, boardModel, style=DEFAULT_STYLE)
+    {
+        Arrangement._assertValidConstructorArgs(rootNode, boardModel, style);
 
         this._rootNode = rootNode;
         this._boardModel = boardModel;
@@ -52,6 +61,7 @@ export class Arrangement
 
         const canvas = new Canvas(rootNode, {
             layerIds: [
+                "background",
                 "boardGrid"
             ],
             size: {
@@ -60,6 +70,7 @@ export class Arrangement
             }
         });
 
+        const background = new BackgroundView(canvas.layer("background"), style.background);
         const boardView = new BoardView(grid, canvas.layer("boardGrid"), style.grid);
     }
 }

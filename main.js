@@ -6,6 +6,7 @@
 // import * as Themes from '/Themes.js';
 // import * as Visualizer from '/Visualizer.js';
 import { Arrangement } from '/arrangement.js';
+import { BoardModel } from '/model/board_model.js';
 
 
 function element(id)
@@ -187,7 +188,14 @@ function element(id)
 
 export function main()
 {
-    // const workspace = element("workspace");
+    const workspace = element("workspace");
+    const arrangement = new Arrangement(
+        workspace,
+        new BoardModel({
+            sizeX: 39,
+            sizeY: 32
+        })
+    );
 
     // const app = new App(workspace, new Game.BoardSize(39, 32));
     // document.app = app;

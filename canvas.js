@@ -21,19 +21,26 @@ export class Canvas
         });
 
         this._rootNode = rootNode;
-        this._layerNames = parameters.layerNames;
+        this._layerIds = parameters.layerIds;
         this._size = parameters.size;
         this._layers = { };
         this._canvasElements = [ ];
 
-        for (let i = 0; i < this._layerNames.length; ++i)
+        rootNode.style.height = this._size.height + 'px';
+
+        for (let i = 0; i < this._layerIds.length; ++i)
         {
-            const layerName = this._layerNames[i];
+            const layerId = this._layerIds[i];
             const canvasElement = document.createElement('canvas');
+            // TODO: this probably should be in css classs
+            canvasElement.style.position = 'absolute';
+            canvasElement.style.left = '0px';
+            canvasElement.style.right = '0px';
+            canvasElement.style.margin = '0 auto';
             rootNode.appendChild(canvasElement);
             this._canvasElements.push(canvasElement);
             const context = canvasElement.getContext('2d');
-            this._layers[layerName] = new Layer(context);
+            this._layers[layerId] = new Layer(context);
         }
 
         this._updateStyle();
@@ -103,6 +110,16 @@ export class Layer
         this._ctx = drawingContext;
     }
 
+    get width()
+    {
+        return this._ctx.canvas.width;
+    }
+
+    get height()
+    {
+        return this._ctx.canvas.height;
+    }
+
     drawCircle(point, radius, style)
     {
         assertArgs(arguments, {
@@ -138,4 +155,29 @@ export class Layer
             this._ctx.stroke();
         });
     }
+
+    drawRectangle(rectangle, style)
+    {
+        assertArgs(arguments, {
+            rectangle: {
+                left: Number,
+                right: Number,
+                top: Number,
+                bottom: Number
+            },
+            style: Object
+        });
+
+        withStyle(this._ctx, style, () =>
+        {
+            this._ctx.fillRect(
+                rectangle.left,
+                rectangle.top,
+                rectangle.right - rectangle.left,
+                rectangle.bottom - rectangle.top
+            );
+        });
+    }
+
+
 }

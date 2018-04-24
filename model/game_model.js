@@ -10,7 +10,7 @@ const UPDATE_SIGNAL = 'updateGameModel';
 
 export class GameModel extends Publisher
 {
-    constructor(boardModel, actions = [])
+    static _assertValidConstructorArgs(boardModel, actions)
     {
         assertArgs(arguments, {
             boardModel: BoardModel,
@@ -18,6 +18,11 @@ export class GameModel extends Publisher
         });
 
         actions.forEach(action => assert(hasType(action, MoveAction)));
+    }
+
+    constructor(boardModel, actions = [])
+    {
+        GameModel._assertValidConstructorArgs(boardModel, actions);
 
         super([ UPDATE_SIGNAL ]);
         this._boardModel = boardModel;

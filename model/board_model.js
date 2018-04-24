@@ -13,11 +13,11 @@ export class BoardModel
             sizeY: Number
         });
 
-        assert(isNatural(sizeX));
-        assert(isNatural(sizeY));
+        assert(isNatural(parameters.sizeX));
+        assert(isNatural(parameters.sizeY));
 
-        this._sizeX = sizeX;
-        this._sizeY = sizeY;
+        this._sizeX = parameters.sizeX;
+        this._sizeY = parameters.sizeY;
     }
 
     get sizeX()
