@@ -5,7 +5,7 @@ export function updateAttrs(target, attrs)
 {
     for (const attrKey in attrs)
     {
-        assert(attrKey in target);
+        assert(attrKey in target, `${attrKey} is not in ${target}`);
     }
 
     Object.assign(target, attrs);
