@@ -1,7 +1,7 @@
 import { assert } from '/utils/assert.js';
 import { assertNamedArgs } from '/utils/assert_args.js';
-import { Publisher } from '/utils/'
-import { isNatural } from '/utils/is_natural';
+import { Publisher } from '/utils/publisher.js'
+import { isNatural } from '/utils/is_natural.js';
 
 
 export class BoardModel

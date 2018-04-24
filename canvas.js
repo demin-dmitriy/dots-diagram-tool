@@ -1,5 +1,5 @@
 import { assert } from '/utils/assert.js';
-import { assertArgs } from '/utils/assertArgs';
+import { assertArgs } from '/utils/assert_args.js';
 import { updateAttrs } from '/utils/update_attrs.js';
 import { Vector } from '/data/vector.js';
 import * as array_utils from '/utils/array.js';
@@ -96,7 +96,7 @@ function withStyle(drawingContext, style, continuation)
 }
 
 
-class Layer
+export class Layer
 {
     constructor(drawingContext)
     {

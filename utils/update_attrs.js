@@ -1,7 +1,7 @@
 import { assert } from '/utils/assert.js';
 
 
-function updateAttrs(target, attrs)
+export function updateAttrs(target, attrs)
 {
     for (const attrKey in attrs)
     {

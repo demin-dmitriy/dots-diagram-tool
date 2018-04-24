@@ -2,7 +2,7 @@ import { assertArgs, assertNamedArgs } from '/utils/assert_args.js';
 import { assert } from '/utils/assert.js';
 import { Vector } from '/data/vector.js';
 import { Maybe } from '/data/maybe.js';
-import { BoardModel } from '/model/BoardModel.js';
+import { BoardModel } from '/model/board_model.js';
 
 
 /*
@@ -19,7 +19,6 @@ export class Grid
             cellSize : Number,
             boardModel : BoardModel
         });
-
 
         assert(parameters.cellSize > 0);
 
@@ -62,6 +61,7 @@ export class Grid
     horizontalLine(j)
     {
         assertArgs(arguments, { j : Number });
+        assert(0 <= j && j < this.sizeY);
 
         return this._paddingY + this._cellSize * j;
     }
@@ -69,6 +69,7 @@ export class Grid
     verticalLine(i)
     {
         assertArgs(arguments, { i : Number});
+        assert(0 <= i && i < this.sizeX);
 
         return this._paddingX + this._cellSize * i;
     }
