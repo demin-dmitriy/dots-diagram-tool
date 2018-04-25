@@ -56,6 +56,7 @@ export class GameModel extends Publisher
 
     addAction(action)
     {
+        // TODO: separate signal for adding just a move?
         assertArgs(arguments, { action: MoveAction });
         this._actions.push(action);
 

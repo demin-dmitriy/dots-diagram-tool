@@ -179,5 +179,33 @@ export class Layer
         });
     }
 
+    drawPolygon(points, style)
+    {
+        assertArgs(arguments, {
+            points: Array, /* of Vector */
+            style: Object
+        });
 
+        assert(points.length > 0);
+
+        const ctx = this._context;
+
+        withStyle(ctx, style, () =>
+        {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; ++i)
+            {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+        });
+    }
+
+    clear()
+    {
+        this._ctx.canvas.height = this.height;
+    }
 }
