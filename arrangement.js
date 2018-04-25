@@ -27,7 +27,7 @@ export const DEFAULT_STYLE = Object.freeze({
     }),
 
     selection: Object.freeze({
-        unselectedColor: 'rgba(0, 0, 0, 0.15)',
+        shadowColor: 'rgba(0, 0, 0, 0.15)',
     }),
 
     grid: Object.freeze({
@@ -48,7 +48,13 @@ export class Arrangement
         assertArgs(arguments, {
             rootNode: HTMLElement,
             boardModel: BoardModel,
-            style: Object // TODO: specify fields
+            style: {
+                background: Object,
+                board: Object,
+                game: Object,
+                selection: Object,
+                grid: Object
+            } // TODO: specify other fields
         });
     }
 
@@ -56,10 +62,32 @@ export class Arrangement
     {
         Arrangement._assertValidConstructorArgs(rootNode, boardModel, style);
 
-        this._rootNode = rootNode;
         this._boardModel = boardModel;
         this._style = style;
+        this._canvas = new Canvas(rootNode, {
+            layerIds: [
+                "background",
+                "board-grid",
+                "game"
+            ],
+            size: { width: 0, height: 0 }
+        });
 
+        this._update();
+    }
+
+    updateBoardModel(boardModel)
+    {
+        this._boardModel = boardModel;
+        this._update();
+    }
+
+    _update()
+    {
+        const canvas = this._canvas;
+        const style = this._style;
+        const boardModel = this._boardModel;
+       
         const grid = new Grid({
             paddingX: style.grid.paddingLeft,
             paddingY: style.grid.paddingTop,
@@ -67,19 +95,12 @@ export class Arrangement
             boardModel: boardModel
         });
 
-        const gameModel = new GameModel(boardModel);
-
-        const canvas = new Canvas(rootNode, {
-            layerIds: [
-                "background",
-                "board-grid",
-                "game"
-            ],
-            size: {
-                width: grid.right + style.grid.paddingRight,
-                height: grid.bottom + style.grid.paddingBottom
-            }
+        canvas.resize({
+            width: grid.right + style.grid.paddingRight,
+            height: grid.bottom + style.grid.paddingBottom
         });
+        
+        const gameModel = new GameModel(boardModel);        
 
         const background = new BackgroundView(canvas.layer("background"), style.background);
         const boardView = new BoardView(grid, canvas.layer("board-grid"), style.board);

@@ -49,6 +49,13 @@ export class Canvas
 
     resize(size)
     {
+        assertArgs(arguments, {
+            size: {
+                width: Number,
+                height: Number,
+            }
+        });
+
         this._size = size;
 
         for (let i = 0; i < this._canvasElements.length; ++i)
@@ -89,7 +96,7 @@ export class Canvas
 
     _updateStyle()
     {
-        this._rootNode.style.height = this._size.height;
+        this._rootNode.style.height = this._size.height + 'px';
     }
 }
 
