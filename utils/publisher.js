@@ -14,11 +14,11 @@ export class Publisher
         this._signalToSubscribers = {};
         this._signalToHandlerName = {};
 
-        for (let i = 0; i < signals.length; i++)
+        for (const signal of signals)
         {
-            this._signalToSubscribers[signals[i]] = new Set();
-            this._signalToHandlerName[signals[i]]
-                    = signalNameToHandlerName(signals[i]);
+            this._signalToSubscribers[signal] = new Set();
+            this._signalToHandlerName[signal]
+                    = signalNameToHandlerName(signal);
         }
     }
 

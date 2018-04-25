@@ -22,14 +22,14 @@ function assertSatisfySpec(name, value, argSpec)
 
 export function assertNamedArgs(args, spec)
 {
-    for (let argName in spec)
+    for (const argName in spec)
     {
         assert(argName in args, `argument "${argName}" is missing`);
         assertSatisfySpec(argName, args[argName], spec[argName]);
     }
 
     // Optional arguments aren't allowed for now
-    for (let argName in args)
+    for (const argName in args)
     {
         assert(argName in spec, `superfluous argument "${argName}"`);
     }
@@ -48,7 +48,7 @@ export function assertArgs(args, spec)
 
     let i = 0;
 
-    for (let argName in spec)
+    for (const argName in spec)
     {
         assertSatisfySpec(argName, args[i], spec[argName]);
         i += 1;

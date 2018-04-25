@@ -40,9 +40,9 @@ export class GameView
         this._layer.clear();
         const actions = this._gameModel.actions;
 
-        for (let i = 0; i < actions.length; ++i)
+        for (const action of actions)
         {
-            actions[i].on({
+            action.on({
                 placeDot: this._drawDot.bind(this),
                 surround: this._drawSurround.bind(this)
             })
