@@ -43,8 +43,8 @@ export class GameView
         for (let i = 0; i < actions.length; ++i)
         {
             actions[i].on({
-                placeDot: this._drawDot,
-                surround: this._drawSurround
+                placeDot: this._drawDot.bind(this),
+                surround: this._drawSurround.bind(this)
             })
         }
     }
@@ -101,7 +101,7 @@ export class GameView
         })
 
         this._layer.drawCircle(
-            grid.at(position),
+            this._grid.at(position),
             this._style.dotRadius,
             this._dotStyle(color)
         );

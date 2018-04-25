@@ -2,6 +2,7 @@ import { Vector } from '/data/vector.js';
 import { assertArgs } from '/utils/assert_args.js';
 import { Loop } from '/model/loop.js';
 import { Color } from '/model/color.js';
+import { TYPE_FUNC } from '/utils/has_type.js';
 
 
 class PlaceDotAction
@@ -57,4 +58,13 @@ export class MoveAction
     {
         return new SurroundAction(...arguments);
     }
+}
+
+
+MoveAction[TYPE_FUNC] = isMoveAction;
+
+
+function isMoveAction(value)
+{
+    return value instanceof PlaceDotAction || value instanceof SurroundAction;
 }

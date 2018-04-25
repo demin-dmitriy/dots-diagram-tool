@@ -1,10 +1,10 @@
 import { assert, assertEq } from '/utils/assert.js';
-import { hasType } from '/utils/has_type.js';
+import { TYPE_FUNC, hasType } from '/utils/has_type.js';
 
 
 function assertSatisfySpec(name, value, argSpec)
 {
-    if (typeof argSpec === 'object')
+    if (typeof argSpec === 'object' && !(TYPE_FUNC in argSpec))
     {
         assertNamedArgs(value, argSpec);
     }

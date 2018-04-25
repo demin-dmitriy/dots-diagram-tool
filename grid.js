@@ -79,8 +79,8 @@ export class Grid
         assertArgs(arguments, { gridPoint : Vector });
 
         return new Vector(
-            verticalLine(gridPoint.x),
-            horizontalLine(gridPoint.y)
+            this.verticalLine(gridPoint.x),
+            this.horizontalLine(gridPoint.y)
         );
     }
 

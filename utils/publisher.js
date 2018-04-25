@@ -24,17 +24,14 @@ export class Publisher
 
     subscribe(listener, signals)
     {
-        for (let i = 0; i < signals.length; i++)
+        for (const signal of signals)
         {
-            assert(
-                signals[i] in this._signalToSubscribers,
-                "Invalid signal " + signals[i]
-            );
+            assert(signal in this._signalToSubscribers, "Invalid signal " + signal);
         }
 
-        for (let i = 0; i < signals.length; i++)
+        for (const signal of signals)
         {
-            this._signalToSubscribers[signals[i]].add(listener);
+            this._signalToSubscribers[signal].add(listener);
         }
     }
 
@@ -45,9 +42,8 @@ export class Publisher
         const subscribers = this._signalToSubscribers[signal];
         const handlerName = this._signalToHandlerName[signal];
 
-        for (let i = 0; i < subscribers.length; i++)
+        for (const subscriber of subscribers)
         {
-            const subscriber = this._subscribers[i];
             assert(
                 handlerName in subscriber,
                 "Subscriber doesn't have handler " + handlerName
