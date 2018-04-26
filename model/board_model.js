@@ -1,6 +1,5 @@
 import { assert } from '/utils/assert.js';
 import { assertNamedArgs } from '/utils/assert_args.js';
-import { Publisher } from '/utils/publisher.js'
 import { isNatural } from '/utils/is_natural.js';
 
 
