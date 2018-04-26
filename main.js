@@ -6,7 +6,7 @@
 // import * as Themes from '/Themes.js';
 // import * as Visualizer from '/Visualizer.js';
 import { Arrangement } from '/arrangement.js';
-import { BoardModel } from '/model/board_model.js';
+import { BoardModel } from '/viewmodel/board_model.js';
 
 
 function element(id)

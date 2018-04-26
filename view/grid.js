@@ -2,7 +2,7 @@ import { assertArgs, assertNamedArgs } from '/utils/assert_args.js';
 import { assert } from '/utils/assert.js';
 import { Vector } from '/data/vector.js';
 import { Maybe } from '/data/maybe.js';
-import { BoardModel } from '/model/board_model.js';
+import { BoardModel } from '/viewmodel/board_model.js';
 
 
 /*

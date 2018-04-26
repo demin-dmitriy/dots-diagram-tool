@@ -1,7 +1,7 @@
-import { Grid } from '/grid.js';
-import { Layer } from '/canvas.js';
 import { assertArgs } from '/utils/assert_args.js';
 import { Vector } from '/data/vector.js';
+import { Grid } from '/view/grid.js';
+import { Layer } from '/view/canvas.js';
 
 
 export class BoardView

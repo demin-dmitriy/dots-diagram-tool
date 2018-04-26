@@ -1,10 +1,10 @@
 import { assertArgs, assertNamedArgs } from '/utils/assert_args.js';
-import { Layer } from '/canvas.js';
-import { Grid } from '/grid.js';
-import { GameModel } from '/model/game_model.js';
-import { Color } from '/model/color.js';
 import { Vector } from '/data/vector.js';
-import { Loop } from '/model/loop.js';
+import { GameModel } from '/viewmodel/game_model.js';
+import { Color } from '/viewmodel/color.js';
+import { Loop } from '/viewmodel/loop.js';
+import { Layer } from '/view/canvas.js';
+import { Grid } from '/view/grid.js';
 
 
 export class GameView

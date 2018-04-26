@@ -1,5 +1,5 @@
 import { assertArgs } from '/utils/assert_args.js';
-import { Layer } from '/canvas.js';
+import { Layer } from '/view/canvas.js';
 
 
 export class BackgroundView

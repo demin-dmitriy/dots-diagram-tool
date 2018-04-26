@@ -1,7 +1,7 @@
 import { assertArgs } from '/utils/assert_args.js';
-import { Publisher } from '/utils/publisher.js';
-import { BoardModel } from '/model/board_model.js';
-import { MoveAction } from '/model/move_action.js';
+import { Publisher } from '/publisher.js';
+import { BoardModel } from '/viewmodel/board_model.js';
+import { MoveAction } from '/viewmodel/move_action.js';
 import { hasType } from '/utils/has_type.js'
 
 

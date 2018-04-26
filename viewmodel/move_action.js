@@ -1,7 +1,7 @@
 import { Vector } from '/data/vector.js';
 import { assertArgs } from '/utils/assert_args.js';
-import { Loop } from '/model/loop.js';
-import { Color } from '/model/color.js';
+import { Loop } from '/viewmodel/loop.js';
+import { Color } from '/viewmodel/color.js';
 import { TYPE_FUNC } from '/utils/has_type.js';
 
 

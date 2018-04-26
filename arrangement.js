@@ -1,11 +1,11 @@
 import { assertArgs } from '/utils/assert_args.js';
-import { BoardModel } from '/model/board_model.js';
+import { BoardModel } from '/viewmodel/board_model.js';
+import { GameModel } from '/viewmodel/game_model.js';
 import { BoardView } from '/view/board_view.js';
-import { Grid } from '/grid.js';
-import { GameModel } from '/model/game_model.js';
+import { Grid } from '/view/grid.js';
 import { GameView } from '/view/game_view.js';
-import { Canvas } from '/canvas.js';
 import { BackgroundView } from '/view/background_view.js';
+import { Canvas } from '/view/canvas.js';
 
 
 export const DEFAULT_STYLE = Object.freeze({

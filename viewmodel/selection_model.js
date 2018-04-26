@@ -1,7 +1,7 @@
 import { assert } from '/utils/assert.js';
 import { assertNamedArgs, assertArgs } from '/utils/assert_args.js';
-import { Publisher } from '/utils/publisher.js';
-import { BoardModel } from '/model/board_model.js';
+import { Publisher } from '/publisher.js';
+import { BoardModel } from '/viewmodel/board_model.js';
 
 
 const UPDATE_SIGNAL = 'updateSelectionModel';
