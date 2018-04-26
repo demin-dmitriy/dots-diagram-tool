@@ -1,54 +1,41 @@
 import { assert } from '/utils/assert.js';
-
-
-function signalNameToHandlerName(signal)
-{
-    return signal + "Handler";
-}
+import { assertArgs } from '/utils/assert_args.js';
 
 
 export class Publisher
 {
-    constructor(signals)
+    constructor(signalSpecs)
     {
-        this._signalToSubscribers = {};
-        this._signalToHandlerName = {};
+        this._signalToCallbacks = {};
+        this._signalToSpecs = {};
 
-        for (const signal of signals)
+        for (const [signal, spec] of Object.entries(signalSpecs))
         {
-            this._signalToSubscribers[signal] = new Set();
-            this._signalToHandlerName[signal]
-                    = signalNameToHandlerName(signal);
+            this._signalToCallbacks[signal] = new Set();
+            this._signalToSpecs[signal] = spec;
         }
     }
 
-    subscribe(listener, signals)
+    on(signal, callback)
     {
-        for (const signal of signals)
-        {
-            assert(signal in this._signalToSubscribers, "Invalid signal " + signal);
-        }
+        assert(signal in this._signalToCallbacks, "Invalid signal " + signal);
 
-        for (const signal of signals)
-        {
-            this._signalToSubscribers[signal].add(listener);
-        }
+        this._signalToCallbacks[signal].add(callback);
     }
 
     notify(signal, args)
     {
-        assert(signal in this._signalToSubscribers, "Invalid signal " + signal);
+        assert(signal in this._signalToCallbacks, "Invalid signal " + signal);
 
-        const subscribers = this._signalToSubscribers[signal];
-        const handlerName = this._signalToHandlerName[signal];
+        const spec = this._signalToSpecs[signal];
 
-        for (const subscriber of subscribers)
+        assertArgs(args, spec);
+
+        const callbacks = this._signalToCallbacks[signal];
+
+        for (const callback of callbacks)
         {
-            assert(
-                handlerName in subscriber,
-                "Subscriber doesn't have handler " + handlerName
-            );
-            subscriber[handlerName](...args);
+            callback(...args);
         }
     }
 }

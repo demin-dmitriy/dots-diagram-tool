@@ -24,7 +24,9 @@ export class GameModel extends Publisher
     {
         GameModel._assertValidConstructorArgs(boardModel, actions);
 
-        super([ UPDATE_SIGNAL ]);
+        super({
+            [UPDATE_SIGNAL]: { }
+        });
         this._boardModel = boardModel;
         this._actions = actions;
     }

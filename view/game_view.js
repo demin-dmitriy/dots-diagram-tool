@@ -30,7 +30,7 @@ export class GameView
         this._gameModel = parameters.gameModel;
         this._style = parameters.style;
 
-        this._gameModel.subscribe(this, [ "updateGameModel" ]);
+        this._gameModel.on("updateGameModel", () => this.updateGameModelHandler());
 
         this.updateGameModelHandler();
     }
